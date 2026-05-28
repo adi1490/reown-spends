@@ -1,26 +1,108 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Sora:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light Mode Palette */
+  --bg-base: #F9F8F5;
+  --bg-surface: #FFFFFF;
+  --bg-subtle: #F2F1EE;
+  --accent: #feb904;
+  --accent-fg: #000000;
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --text-muted: #999999;
+  --border: #E5E4E0;
+  --danger: #D94F3D;
+  --danger-fg: #FFFFFF;
+
+  --background: var(--bg-base);
+  --foreground: var(--text-primary);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Dark Mode Palette */
+.dark {
+  --bg-base: #111110;
+  --bg-surface: #1C1C1A;
+  --bg-subtle: #242422;
+  --accent: #feb904;
+  --accent-fg: #000000;
+  --text-primary: #F0EFEB;
+  --text-secondary: #A0A09A;
+  --text-muted: #555550;
+  --border: #2E2E2B;
+  --danger: #E05C4A;
+  --danger-fg: #FFFFFF;
+
+  --background: var(--bg-base);
+  --foreground: var(--text-primary);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme {
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-border: var(--border);
+  --color-danger: var(--danger);
+  --color-danger-fg: var(--danger-fg);
+  
+  --font-display: 'Sora', 'Plus Jakarta Sans', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'Geist Mono', 'Courier New', Courier, monospace;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Custom scrollbars for a premium feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Standard glassmorphism & cards animations */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+}
+
+.dark .glass-panel {
+  background: rgba(28, 28, 26, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+}
+
+/* Micro-animations */
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+/* Monospace with tabular numerals for perfect table alignment */
+.font-tabular {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
 }
