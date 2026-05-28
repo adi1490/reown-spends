@@ -100,7 +100,7 @@ function LoginFormContent() {
         </div>
 
         {/* Login Card */}
-        <div className="bg-bg-surface border border-border rounded-3xl p-8 shadow-xl transition-all duration-300 relative overflow-hidden">
+        <div className="bg-bg-surface border border-border rounded-2xl p-8 shadow-xl transition-all duration-300 relative overflow-hidden">
           {error && (
             <div className="mb-6 flex items-start gap-3 p-4 rounded-2xl bg-danger/10 border border-danger/20 text-danger text-sm font-medium animate-shake">
               <ShieldAlert size={18} className="shrink-0 mt-0.5" />

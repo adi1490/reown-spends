@@ -46,7 +46,7 @@ export default function ExportPage() {
 
   const getFormatCardStyle = (fmt: 'xlsx' | 'csv' | 'md' | 'pdf') => {
     const active = selectedFormat === fmt;
-    return `p-5 rounded-3xl border transition-all duration-300 flex flex-col items-center justify-center text-center cursor-pointer select-none hover-lift ${
+    return `p-5 rounded-2xl border transition-all duration-300 flex flex-col items-center justify-center text-center cursor-pointer select-none hover-lift ${
       active
         ? 'bg-accent/15 border-accent text-[#cda005] dark:text-[#feb904] ring-4 ring-accent/15 font-bold'
         : 'bg-bg-surface border-border text-text-secondary hover:text-text-primary hover:bg-bg-subtle'
@@ -70,7 +70,7 @@ export default function ExportPage() {
         <div className="md:col-span-2 space-y-6">
           
           {/* 1. Format Selection Card */}
-          <div className="bg-bg-surface border border-border rounded-3xl p-6 shadow-sm space-y-4">
+          <div className="bg-bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-4">
             <h3 className="text-sm font-bold uppercase tracking-wider text-text-primary flex items-center gap-2">
               <span>Step 1: Choose File Format</span>
             </h3>
@@ -107,7 +107,7 @@ export default function ExportPage() {
           </div>
 
           {/* 2. Scope Selection Card */}
-          <div className="bg-bg-surface border border-border rounded-3xl p-6 shadow-sm space-y-5">
+          <div className="bg-bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-5">
             <h3 className="text-sm font-bold uppercase tracking-wider text-text-primary">
               Step 2: Choose Data Scope
             </h3>
@@ -178,7 +178,7 @@ export default function ExportPage() {
 
         {/* Right Column: Information Panel */}
         <div className="md:col-span-1 space-y-6">
-          <div className="bg-bg-surface border border-border rounded-3xl p-6 shadow-sm space-y-4">
+          <div className="bg-bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-4">
             <h3 className="text-sm font-bold uppercase tracking-wider text-text-primary flex items-center gap-1.5">
               <Sparkles size={16} className="text-accent" />
               <span>Export Guidelines</span>

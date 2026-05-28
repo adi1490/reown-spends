@@ -371,48 +371,47 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* KPI 1: Total Spent */}
-        <div className="bg-bg-surface border border-border rounded-3xl p-6 shadow-sm flex flex-col justify-between hover-lift relative overflow-hidden transition-all duration-300">
-          <div className="absolute top-0 left-0 w-1.5 h-full bg-[#feb904]" />
+        <div className="bg-bg-surface border border-border rounded-2xl p-6 flex flex-col justify-between hover-lift transition-all duration-300">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Total transacted</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Total transacted</p>
             {isLoading ? (
               <div className="h-8 w-24 bg-bg-subtle animate-pulse rounded-lg mt-2" />
             ) : (
-              <h3 className="text-2xl font-extrabold text-text-primary font-tabular tracking-tight mt-2">
-                ₹{summary.totalSpent.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+              <h3 className="text-2xl font-semibold text-text-primary font-tabular tracking-tight mt-2">
+                ₹{Math.floor(summary.totalSpent).toLocaleString('en-IN')}
+                <span className="text-accent text-lg font-medium">.00</span>
               </h3>
             )}
           </div>
-          <p className="text-[10px] text-text-secondary mt-4 font-light flex items-center gap-1">
-            <TrendingUp size={12} className="text-[#feb904]" />
+          <p className="text-[10px] text-text-secondary mt-4 font-light flex items-center gap-1.5">
+            <TrendingUp size={12} className="text-accent shrink-0" />
             <span>Aggregate summation of range</span>
           </p>
         </div>
 
         {/* KPI 2: This Month */}
-        <div className="bg-bg-surface border border-border rounded-3xl p-6 shadow-sm flex flex-col justify-between hover-lift relative overflow-hidden transition-all duration-300">
-          <div className="absolute top-0 left-0 w-1.5 h-full bg-[#4361ee]" />
+        <div className="bg-bg-surface border border-border rounded-2xl p-6 flex flex-col justify-between hover-lift transition-all duration-300">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">This Calendar Month</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">This Calendar Month</p>
             {isLoading ? (
               <div className="h-8 w-24 bg-bg-subtle animate-pulse rounded-lg mt-2" />
             ) : (
-              <h3 className="text-2xl font-extrabold text-text-primary font-tabular tracking-tight mt-2">
-                ₹{summary.thisMonthSpent.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+              <h3 className="text-2xl font-semibold text-text-primary font-tabular tracking-tight mt-2">
+                ₹{Math.floor(summary.thisMonthSpent).toLocaleString('en-IN')}
+                <span className="text-accent text-lg font-medium">.00</span>
               </h3>
             )}
           </div>
-          {/* Trend Indicator */}
           {!isLoading && (
-            <p className="text-[10px] text-text-secondary mt-4 font-light flex items-center gap-1">
+            <p className="text-[10px] text-text-secondary mt-4 font-light flex items-center gap-1.5">
               {summary.thisMonthSpent >= summary.lastMonthSpent ? (
                 <>
-                  <TrendingUp size={12} className="text-[#e71d36]" />
+                  <TrendingUp size={12} className="text-danger shrink-0" />
                   <span>Up from last month</span>
                 </>
               ) : (
                 <>
-                  <TrendingDown size={12} className="text-[#2ec4b6]" />
+                  <TrendingDown size={12} className="text-accent shrink-0" />
                   <span>Down from last month</span>
                 </>
               )}
@@ -421,15 +420,15 @@ export default function Dashboard() {
         </div>
 
         {/* KPI 3: Last Month */}
-        <div className="bg-bg-surface border border-border rounded-3xl p-6 shadow-sm flex flex-col justify-between hover-lift relative overflow-hidden transition-all duration-300">
-          <div className="absolute top-0 left-0 w-1.5 h-full bg-[#2ec4b6]" />
+        <div className="bg-bg-surface border border-border rounded-2xl p-6 flex flex-col justify-between hover-lift transition-all duration-300">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Last Calendar Month</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Last Calendar Month</p>
             {isLoading ? (
               <div className="h-8 w-24 bg-bg-subtle animate-pulse rounded-lg mt-2" />
             ) : (
-              <h3 className="text-2xl font-extrabold text-text-primary font-tabular tracking-tight mt-2">
-                ₹{summary.lastMonthSpent.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+              <h3 className="text-2xl font-semibold text-text-primary font-tabular tracking-tight mt-2">
+                ₹{Math.floor(summary.lastMonthSpent).toLocaleString('en-IN')}
+                <span className="text-accent text-lg font-medium">.00</span>
               </h3>
             )}
           </div>
@@ -439,15 +438,15 @@ export default function Dashboard() {
         </div>
 
         {/* KPI 4: Largest Single Spent */}
-        <div className="bg-bg-surface border border-border rounded-3xl p-6 shadow-sm flex flex-col justify-between hover-lift relative overflow-hidden transition-all duration-300">
-          <div className="absolute top-0 left-0 w-1.5 h-full bg-[#e71d36]" />
+        <div className="bg-bg-surface border border-border rounded-2xl p-6 flex flex-col justify-between hover-lift transition-all duration-300">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Largest transaction</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Largest transaction</p>
             {isLoading ? (
               <div className="h-8 w-24 bg-bg-subtle animate-pulse rounded-lg mt-2" />
             ) : (
-              <h3 className="text-2xl font-extrabold text-text-primary font-tabular tracking-tight mt-2">
-                ₹{summary.largestExpense.amount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+              <h3 className="text-2xl font-semibold text-text-primary font-tabular tracking-tight mt-2">
+                ₹{Math.floor(summary.largestExpense.amount).toLocaleString('en-IN')}
+                <span className="text-accent text-lg font-medium">.00</span>
               </h3>
             )}
           </div>
@@ -462,7 +461,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
         
         {/* Chart 1: Monthly Spend Bar Chart (Chronological History) */}
-        <div className="lg:col-span-4 bg-bg-surface border border-border rounded-3xl p-6 shadow-sm space-y-4">
+        <div className="lg:col-span-4 bg-bg-surface border border-border rounded-2xl p-6 space-y-4">
           <h4 className="text-xs font-bold uppercase tracking-wider text-text-secondary">12-Month Financial Burn Trend</h4>
           
           <div className="h-[280px] w-full">
@@ -471,17 +470,17 @@ export default function Dashboard() {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={charts.monthlyHistory} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v >= 1000 ? (v / 1000) + 'k' : v}`} />
+                  <CartesianGrid strokeDasharray="4 4" stroke="var(--border)" strokeWidth={0.5} vertical={false} />
+                  <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10, fontFamily: 'var(--font-sans)' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 10, fontFamily: 'var(--font-mono)' }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v >= 1000 ? (v / 1000) + 'k' : v}`} />
                   <Tooltip 
                     cursor={{ fill: 'var(--bg-subtle)', opacity: 0.5 }}
-                    contentStyle={{ background: 'var(--bg-surface)', borderColor: 'var(--border)', borderRadius: '16px' }}
+                    contentStyle={{ background: 'var(--bg-surface)', borderColor: 'var(--border)', borderRadius: '8px', boxShadow: 'none' }}
                     labelStyle={{ color: 'var(--text-primary)', fontWeight: 'bold', fontSize: '11px' }}
                     itemStyle={{ color: '#feb904', fontWeight: 'bold', fontSize: '12px' }}
                     formatter={(value: any) => [`₹${value?.toLocaleString('en-IN') || '0.00'}`, 'Monthly Burn']}
                   />
-                  <Bar dataKey="amount" fill="#feb904" radius={[6, 6, 0, 0]} maxBarSize={45} />
+                  <Bar dataKey="amount" fill="#feb904" radius={[4, 4, 0, 0]} maxBarSize={40} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -489,7 +488,7 @@ export default function Dashboard() {
         </div>
 
         {/* Chart 2: Category Distribution Pie/Doughnut Chart */}
-        <div className="lg:col-span-2 bg-bg-surface border border-border rounded-3xl p-6 shadow-sm space-y-4 flex flex-col justify-between">
+        <div className="lg:col-span-2 bg-bg-surface border border-border rounded-2xl p-6 space-y-4 flex flex-col justify-between">
           <h4 className="text-xs font-bold uppercase tracking-wider text-text-secondary">Category Allocation Ratios</h4>
 
           {isLoading ? (
@@ -515,7 +514,7 @@ export default function Dashboard() {
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ background: 'var(--bg-surface)', borderColor: 'var(--border)', borderRadius: '16px' }}
+                    contentStyle={{ background: 'var(--bg-surface)', borderColor: 'var(--border)', borderRadius: '8px', boxShadow: 'none' }}
                     itemStyle={{ fontSize: '11px', fontWeight: 'bold' }}
                     formatter={(value: any, name: any, props: any) => [`₹${value.toLocaleString('en-IN')} (${props.payload.percentage}%)`, name]}
                   />
@@ -529,10 +528,10 @@ export default function Dashboard() {
             {charts.categoryDistribution.slice(0, 4).map((entry, index) => (
               <div key={entry.category} className="flex items-center justify-between text-[10px]">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }} />
+                  <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }} />
                   <span className="text-text-secondary truncate font-medium">{entry.category}</span>
                 </div>
-                <span className="font-bold text-text-primary font-tabular">
+                <span className="font-bold text-text-primary font-mono">
                   {entry.percentage}%
                 </span>
               </div>
@@ -541,7 +540,7 @@ export default function Dashboard() {
         </div>
 
         {/* Chart 3: Cumulative Spend Over Time Line Chart */}
-        <div className="lg:col-span-3 bg-bg-surface border border-border rounded-3xl p-6 shadow-sm space-y-4">
+        <div className="lg:col-span-3 bg-bg-surface border border-border rounded-2xl p-6 space-y-4">
           <h4 className="text-xs font-bold uppercase tracking-wider text-text-secondary">Cumulative Spend Curve</h4>
           
           <div className="h-[260px] w-full">
@@ -552,16 +551,16 @@ export default function Dashboard() {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={charts.cumulativeSeries} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="date" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v >= 1000 ? (v / 1000) + 'k' : v}`} />
+                  <CartesianGrid strokeDasharray="4 4" stroke="var(--border)" strokeWidth={0.5} vertical={false} />
+                  <XAxis dataKey="date" tick={{ fill: 'var(--text-secondary)', fontSize: 10, fontFamily: 'var(--font-sans)' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 10, fontFamily: 'var(--font-mono)' }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v >= 1000 ? (v / 1000) + 'k' : v}`} />
                   <Tooltip 
-                    contentStyle={{ background: 'var(--bg-surface)', borderColor: 'var(--border)', borderRadius: '16px' }}
+                    contentStyle={{ background: 'var(--bg-surface)', borderColor: 'var(--border)', borderRadius: '8px', boxShadow: 'none' }}
                     labelStyle={{ color: 'var(--text-primary)', fontWeight: 'bold', fontSize: '11px' }}
                     itemStyle={{ color: '#feb904', fontWeight: 'bold', fontSize: '12px' }}
                     formatter={(value: any) => [`₹${value?.toLocaleString('en-IN') || '0.00'}`, 'Cumulative Spent']}
                   />
-                  <Line type="monotone" dataKey="amount" stroke="#feb904" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
+                  <Line type="monotone" dataKey="amount" stroke="#feb904" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>
             )}
@@ -569,7 +568,7 @@ export default function Dashboard() {
         </div>
 
         {/* Chart 4: Payment Source Distribution Bar Chart */}
-        <div className="lg:col-span-3 bg-bg-surface border border-border rounded-3xl p-6 shadow-sm space-y-4">
+        <div className="lg:col-span-3 bg-bg-surface border border-border rounded-2xl p-6 space-y-4">
           <h4 className="text-xs font-bold uppercase tracking-wider text-text-secondary">Funding Ratios per Source</h4>
           
           <div className="h-[260px] w-full">
@@ -580,15 +579,15 @@ export default function Dashboard() {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={charts.sourceDistribution} layout="vertical" margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
-                  <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v >= 1000 ? (v / 1000) + 'k' : v}`} />
+                  <CartesianGrid strokeDasharray="4 4" stroke="var(--border)" strokeWidth={0.5} horizontal={false} />
+                  <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 10, fontFamily: 'var(--font-mono)' }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v >= 1000 ? (v / 1000) + 'k' : v}`} />
                   <YAxis type="category" dataKey="source" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} width={120} axisLine={false} tickLine={false} tickFormatter={(v) => v.split(' ')[0]} />
                   <Tooltip 
-                    contentStyle={{ background: 'var(--bg-surface)', borderColor: 'var(--border)', borderRadius: '16px' }}
+                    contentStyle={{ background: 'var(--bg-surface)', borderColor: 'var(--border)', borderRadius: '8px', boxShadow: 'none' }}
                     itemStyle={{ color: '#feb904', fontWeight: 'bold', fontSize: '12px' }}
                     formatter={(value: any) => [`₹${value?.toLocaleString('en-IN') || '0.00'}`, 'Funding amount']}
                   />
-                  <Bar dataKey="amount" fill="#feb904" radius={[0, 6, 6, 0]} maxBarSize={30}>
+                  <Bar dataKey="amount" fill="#feb904" radius={[0, 4, 4, 0]} maxBarSize={25}>
                     {charts.sourceDistribution.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={CHART_COLORS[(index + 1) % CHART_COLORS.length]} />
                     ))}
@@ -613,7 +612,7 @@ export default function Dashboard() {
       {/* 5. QUICK ADD DIALOG OVERLAY */}
       {showQuickAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs animate-fadeIn">
-          <div className="w-[90%] max-w-[480px] bg-bg-surface border border-border rounded-3xl p-6 md:p-8 shadow-2xl animate-scaleIn overflow-y-auto max-h-[85vh] transition-colors duration-300">
+          <div className="w-[90%] max-w-[480px] bg-bg-surface border border-border rounded-2xl p-6 md:p-8 shadow-2xl animate-scaleIn overflow-y-auto max-h-[85vh] transition-colors duration-300">
             
             <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
               <div>

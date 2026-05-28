@@ -1,36 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  /* Light Mode Palette */
-  --bg-base: #F9F8F5;
-  --bg-surface: #FFFFFF;
-  --bg-subtle: #F2F1EE;
+  /* Light Mode Palette - Quiet Luxury Warm Paper */
+  --bg-base: #fff8f3;
+  --bg-surface: #ffffff;
+  --bg-subtle: #f9f2ed;
   --accent: #feb904;
   --accent-fg: #000000;
-  --text-primary: #111111;
-  --text-secondary: #555555;
-  --text-muted: #999999;
-  --border: #E5E4E0;
-  --danger: #D94F3D;
-  --danger-fg: #FFFFFF;
+  --text-primary: #1d1b18;
+  --text-secondary: #5f5e5c;
+  --text-muted: #837560;
+  --border: #e5e2de;
+  --danger: #ba1a1a;
+  --danger-fg: #ffffff;
 
   --background: var(--bg-base);
   --foreground: var(--text-primary);
 }
 
-/* Dark Mode Palette */
+/* Dark Mode Palette - Sophisticated Charcoal */
 .dark {
-  --bg-base: #111110;
-  --bg-surface: #1C1C1A;
-  --bg-subtle: #242422;
+  --bg-base: #1c1c1a;
+  --bg-surface: #242422;
+  --bg-subtle: #2e2e2c;
   --accent: #feb904;
   --accent-fg: #000000;
-  --text-primary: #F0EFEB;
-  --text-secondary: #A0A09A;
-  --text-muted: #555550;
-  --border: #2E2E2B;
-  --danger: #E05C4A;
-  --danger-fg: #FFFFFF;
+  --text-primary: #f6efeb;
+  --text-secondary: #c8c6c3;
+  --text-muted: #837560;
+  --border: #2e2e2b;
+  --danger: #e05c4a;
+  --danger-fg: #ffffff;
 
   --background: var(--bg-base);
   --foreground: var(--text-primary);
@@ -65,15 +65,15 @@ body {
 
 /* Custom scrollbars for a premium feel */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 4px;
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
@@ -82,22 +82,23 @@ body {
 /* Standard glassmorphism & cards animations */
 .glass-panel {
   background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(20px);
   border: 1px solid var(--border);
 }
 
 .dark .glass-panel {
   background: rgba(28, 28, 26, 0.7);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(20px);
   border: 1px solid var(--border);
 }
 
-/* Micro-animations */
+/* Micro-animations: Quiet Luxury Hover Lift */
 .hover-lift {
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
 }
 .hover-lift:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  border-color: var(--accent) !important;
 }
 
 /* Monospace with tabular numerals for perfect table alignment */
@@ -105,3 +106,4 @@ body {
   font-variant-numeric: tabular-nums;
   font-family: var(--font-mono);
 }
+

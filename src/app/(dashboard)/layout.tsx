@@ -124,9 +124,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="h-16 flex items-center justify-between px-5 border-b border-border">
           <Link href="/" className="flex items-center gap-3 select-none">
             <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-accent text-accent-fg shadow-sm shrink-0">
-              <svg viewBox="0 0 32 32" className="w-5 h-5" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8.2 21.8c2.8 2.8 7.2 3.2 10.8 1.8 3.2-1.2 5.5-4.2 6.2-7.8.2-.8-.4-1.5-1.2-1.5-.6 0-1.1.4-1.3.9-.8 2.1-2.2 3.8-4.2 4.8s-4.2 1.2-6.5.6c-1.5-.4-2.5-1.2-3-2-.5-.8-.7-1.8-1.1-2.8C7.5 12.8 7 12.2 6.2 12.2c-.8 0-1.5.7-1.5 1.5.1 3 1.2 6 3.5 8.1zM23.5 8.5c.5 0 1-.5 1-1s-.5-1-1-1h-3c-.5 0-1 .5-1 1s.5 1 1 1h3z" fill="currentColor"/>
-              </svg>
+              <span className="font-display font-black text-lg tracking-tighter">re</span>
             </div>
             {!isSidebarCollapsed && (
               <span className="font-display font-extrabold text-lg tracking-tight">
@@ -153,13 +151,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer border ${
                   isActive 
-                    ? 'bg-accent text-accent-fg font-bold shadow-md shadow-accent/15' 
-                    : 'text-text-secondary hover:text-text-primary hover:bg-bg-subtle'
+                    ? 'bg-bg-subtle border-border text-text-primary shadow-xs font-bold' 
+                    : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-bg-subtle/50'
                 }`}
               >
-                <Icon size={20} className="shrink-0" />
+                <Icon size={18} className="shrink-0" />
                 {!isSidebarCollapsed && <span>{item.name}</span>}
               </Link>
             );
@@ -209,9 +207,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <header className="md:hidden flex items-center justify-between bg-bg-surface border-b border-border px-4 h-16 sticky top-0 z-30 w-full transition-colors duration-300">
         <Link href="/" className="flex items-center gap-2">
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-accent text-accent-fg shadow-sm">
-            <svg viewBox="0 0 32 32" className="w-4.5 h-4.5" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8.2 21.8c2.8 2.8 7.2 3.2 10.8 1.8 3.2-1.2 5.5-4.2 6.2-7.8.2-.8-.4-1.5-1.2-1.5-.6 0-1.1.4-1.3.9-.8 2.1-2.2 3.8-4.2 4.8s-4.2 1.2-6.5.6c-1.5-.4-2.5-1.2-3-2-.5-.8-.7-1.8-1.1-2.8C7.5 12.8 7 12.2 6.2 12.2c-.8 0-1.5.7-1.5 1.5.1 3 1.2 6 3.5 8.1zM23.5 8.5c.5 0 1-.5 1-1s-.5-1-1-1h-3c-.5 0-1 .5-1 1s.5 1 1 1h3z" fill="currentColor"/>
-            </svg>
+            <span className="font-display font-black text-sm tracking-tighter">re</span>
           </div>
           <span className="font-display font-extrabold text-md tracking-tight">
             re<span className="font-normal opacity-90">OWN</span> <span className="text-[#feb904] font-semibold">Spends</span>
@@ -250,13 +246,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   key={item.name}
                   href={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center gap-4 px-5 py-4 rounded-2xl text-base font-semibold cursor-pointer ${
+                  className={`flex items-center gap-4 px-5 py-3.5 rounded-2xl text-base font-semibold cursor-pointer border ${
                     isActive 
-                      ? 'bg-accent text-accent-fg shadow-md shadow-accent/15' 
-                      : 'text-text-secondary hover:text-text-primary hover:bg-bg-subtle'
+                      ? 'bg-bg-subtle border-border text-text-primary font-bold shadow-xs' 
+                      : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-bg-subtle'
                   }`}
                 >
-                  <Icon size={22} />
+                  <Icon size={20} />
                   <span>{item.name}</span>
                 </Link>
               );
@@ -307,8 +303,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   : 'text-text-secondary hover:text-text-primary'
               }`}
             >
-              <Icon size={20} className={isActive ? 'scale-110 transition-transform font-bold' : ''} />
-              <span className={`text-[10px] mt-1 font-medium ${isActive ? 'font-bold' : 'font-light'}`}>
+              <Icon size={18} className={isActive ? 'scale-105 transition-transform' : ''} />
+              <span className={`text-[9px] mt-1 font-semibold ${isActive ? 'font-bold' : 'font-light'}`}>
                 {item.name}
               </span>
             </Link>

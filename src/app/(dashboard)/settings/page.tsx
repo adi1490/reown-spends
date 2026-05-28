@@ -152,7 +152,7 @@ export default function SettingsPage() {
         
         {/* Profile Card & Info */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-bg-surface border border-border rounded-3xl p-6 shadow-sm">
+          <div className="bg-bg-surface border border-border rounded-2xl p-6 shadow-sm">
             <h2 className="text-lg font-bold text-text-primary flex items-center gap-2 mb-4">
               <User size={20} className="text-accent" />
               <span>Founder Profile</span>
@@ -183,7 +183,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Infrastructure Health */}
-          <div className="bg-bg-surface border border-border rounded-3xl p-6 shadow-sm space-y-4">
+          <div className="bg-bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-4">
             <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
               <Server size={20} className="text-accent" />
               <span>Infrastructure Status</span>
@@ -211,7 +211,7 @@ export default function SettingsPage() {
         <div className="lg:col-span-2 space-y-8">
           
           {/* Change Password Form */}
-          <div className="bg-bg-surface border border-border rounded-3xl p-6 md:p-8 shadow-sm">
+          <div className="bg-bg-surface border border-border rounded-2xl p-6 md:p-8 shadow-sm">
             <h2 className="text-lg font-bold text-text-primary flex items-center gap-2 mb-6">
               <KeyRound size={20} className="text-accent" />
               <span>Security & Password</span>
@@ -311,7 +311,7 @@ export default function SettingsPage() {
           </div>
 
           {/* System Data Backup Details */}
-          <div className="bg-bg-surface border border-border rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
+          <div className="bg-bg-surface border border-border rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
                 <Database size={20} className="text-accent" />

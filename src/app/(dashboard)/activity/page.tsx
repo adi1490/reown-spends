@@ -173,7 +173,7 @@ export default function ActivityLogPage() {
       </div>
 
       {/* 2. Filter Toolbar */}
-      <div className="bg-bg-surface border border-border rounded-3xl p-4 shadow-sm space-y-4">
+      <div className="bg-bg-surface border border-border rounded-2xl p-4 shadow-sm space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-sm text-text-secondary">
             <Clock size={16} className="text-accent" />
@@ -261,8 +261,8 @@ export default function ActivityLogPage() {
           </div>
         ) : logs.length === 0 ? (
           /* Empty Feed */
-          <div className="bg-bg-surface border border-border rounded-3xl py-16 text-center space-y-3 shadow-sm">
-            <div className="inline-flex p-4 bg-bg-subtle border border-border rounded-3xl text-text-secondary">
+          <div className="bg-bg-surface border border-border rounded-2xl py-16 text-center space-y-3 shadow-sm">
+            <div className="inline-flex p-4 bg-bg-subtle border border-border rounded-2xl text-text-secondary">
               <History size={32} />
             </div>
             <h3 className="text-lg font-bold text-text-primary">No activities logged</h3>
@@ -279,7 +279,7 @@ export default function ActivityLogPage() {
               return (
                 <div 
                   key={log.id}
-                  className="bg-bg-surface border border-border rounded-3xl overflow-hidden shadow-sm hover:border-accent/40 transition-all duration-200"
+                  className="bg-bg-surface border border-border rounded-2xl overflow-hidden hover-lift transition-all duration-300"
                 >
                   {/* Summary Card Header bar */}
                   <div 
@@ -344,7 +344,7 @@ export default function ActivityLogPage() {
 
         {/* Pagination footer controls */}
         {!isLoading && logs.length > 0 && (
-          <div className="flex items-center justify-between p-4 border border-border rounded-3xl bg-bg-surface text-xs">
+          <div className="flex items-center justify-between p-4 border border-border rounded-2xl bg-bg-surface text-xs">
             <span className="text-text-secondary font-light">
               Showing <span className="font-bold text-text-primary font-tabular">{(page - 1) * 50 + 1}</span> to{' '}
               <span className="font-bold text-text-primary font-tabular">{Math.min(page * 50, totalCount)}</span> of{' '}

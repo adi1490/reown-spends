@@ -25,6 +25,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "reOWN Spends — Premium Expense & Finance Tracker",
   description: "Internal financial analytics, audit trail ledger, and multi-format reports for REOWN INFOCOM LLP.",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

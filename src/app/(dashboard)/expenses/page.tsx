@@ -389,7 +389,7 @@ export default function ExpensesPage() {
       </div>
 
       {/* 2. Search & Toolbar Controls */}
-      <div className="bg-bg-surface border border-border rounded-3xl p-4 shadow-sm space-y-4">
+      <div className="bg-bg-surface border border-border rounded-2xl p-4 shadow-sm space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Full Text Search Input */}
           <div className="relative flex-1 max-w-md">
@@ -571,7 +571,7 @@ export default function ExpensesPage() {
       </div>
 
       {/* 3. Expense Ledger Data Table / List */}
-      <div className="bg-bg-surface border border-border rounded-3xl overflow-hidden shadow-sm">
+      <div className="bg-bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
         
         {isLoading ? (
           /* Loading skeletons */
@@ -583,7 +583,7 @@ export default function ExpensesPage() {
         ) : expenses.length === 0 ? (
           /* Empty State */
           <div className="py-16 text-center space-y-4">
-            <div className="inline-flex p-4 bg-bg-subtle border border-border rounded-3xl text-text-secondary mb-2">
+            <div className="inline-flex p-4 bg-bg-subtle border border-border rounded-2xl text-text-secondary mb-2">
               <AlertCircle size={32} />
             </div>
             <h3 className="text-lg font-bold text-text-primary">No records found</h3>
@@ -630,7 +630,7 @@ export default function ExpensesPage() {
                   <tr 
                     key={expense.id}
                     onClick={() => openDetail(expense)}
-                    className="hover:bg-bg-subtle/50 transition-colors duration-150 cursor-pointer text-sm"
+                    className="hover-lift hover:bg-bg-subtle/50 transition-all duration-300 cursor-pointer text-sm"
                   >
                     {/* Date */}
                     <td className="p-4 font-tabular text-text-secondary font-medium">
@@ -735,7 +735,7 @@ export default function ExpensesPage() {
             {/* Content body */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Giant Amount Display */}
-              <div className="text-center py-6 px-4 rounded-3xl bg-bg-subtle/50 border border-border/80">
+              <div className="text-center py-6 px-4 rounded-2xl bg-bg-subtle/50 border border-border/80">
                 <span className="text-xs text-text-secondary font-light uppercase tracking-wider">Total Transacted</span>
                 <p className="text-3xl font-extrabold text-text-primary font-tabular mt-1.5">
                   ₹{selectedExpense.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
@@ -1042,7 +1042,7 @@ export default function ExpensesPage() {
       {/* 6. SINGLE DELETE CONFIRMATION MODAL */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-xs animate-fadeIn">
-          <div className="w-[90%] max-w-[400px] bg-bg-surface border border-border rounded-3xl p-6 shadow-2xl animate-scaleIn transition-colors duration-300">
+          <div className="w-[90%] max-w-[400px] bg-bg-surface border border-border rounded-2xl p-6 shadow-2xl animate-scaleIn transition-colors duration-300">
             <h3 className="text-lg font-bold text-text-primary flex items-center gap-2 text-danger">
               <Trash2 size={20} />
               <span>Confirm Delete</span>
