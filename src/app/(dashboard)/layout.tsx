@@ -42,7 +42,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [userName, setUserName] = useState('');
   const [userUsername, setUserUsername] = useState('');
 
-  // Fetch fresh user from session — no default value to avoid flash
+  // Read cached profile synchronously — zero flash
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem('reown_user');
+      if (cached) {
+        const { name, username } = JSON.parse(cached);
+        if (name) setUserName(name);
+        if (username) setUserUsername(username);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  // Background refresh — validates session and updates cache
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -52,12 +64,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           if (data.success && data.user) {
             setUserName(data.user.name);
             setUserUsername(data.user.username);
+            // Keep cache in sync
+            localStorage.setItem('reown_user', JSON.stringify({ name: data.user.name, username: data.user.username }));
           }
         } else {
+          // Session expired — clear cache and redirect
+          localStorage.removeItem('reown_user');
           router.push('/login');
         }
       } catch (err) {
-        console.warn('Could not retrieve user info:', err);
+        console.warn('Could not refresh user info:', err);
       }
     };
     fetchUser();
@@ -87,6 +103,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     try {
       const res = await fetch('/api/auth/logout', { method: 'POST' });
       if (res.ok) {
+        localStorage.removeItem('reown_user');
         sessionStorage.clear();
         router.push('/login');
         router.refresh();

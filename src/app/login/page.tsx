@@ -46,6 +46,10 @@ function LoginFormContent() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Login failed.');
+      // Cache non-sensitive display info for instant profile render
+      if (data.user) {
+        localStorage.setItem('reown_user', JSON.stringify({ name: data.user.name, username: data.user.username }));
+      }
       router.push(callbackUrl);
       router.refresh();
     } catch (err: any) {
