@@ -254,6 +254,22 @@ body {
   background-color: var(--border);
 }
 
+/* ═══ Responsive two-column form row ═══
+   Stacks vertically on narrow modals/mobile, side-by-side on wider screens.
+═══════════════════════════════════════════ */
+.form-two-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+@media (min-width: 480px) {
+  .form-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+}
+
 /* ═══ Mobile overlay insets ═══
    On mobile the top bar is 52px and bottom tab bar is 60px.
    Modals and drawers must sit within that safe area so action

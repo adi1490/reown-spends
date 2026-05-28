@@ -681,6 +681,7 @@ export default function Dashboard() {
               boxShadow: '0 24px 64px rgba(0,0,0,0.15)',
               maxHeight: '90vh',
               overflowY: 'auto',
+              overflowX: 'hidden',
             }}
           >
             {/* Modal header */}
@@ -762,8 +763,8 @@ export default function Dashboard() {
                 {errors.vendor && <p style={{ fontSize: '11px', color: 'var(--danger)', margin: 0 }}>{errors.vendor}</p>}
               </div>
 
-              {/* Category + Paid From */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              {/* Category + Paid From — side-by-side on wide, stacked on narrow */}
+              <div className="form-two-col">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   <label style={sectionLabel}>Category</label>
                   <CustomSelect
