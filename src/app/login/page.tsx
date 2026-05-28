@@ -156,7 +156,7 @@ function LoginFormContent() {
                   type="text"
                   required
                   autoComplete="username"
-                  placeholder="e.g. vishnu"
+                  placeholder="e.g. narasimha"
                   value={username}
                   onChange={e => setUsername(e.target.value)}
                   disabled={isLoading}
