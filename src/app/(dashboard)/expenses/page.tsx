@@ -103,6 +103,8 @@ export default function ExpensesPage() {
   const [sortOrder, setSortOrder] = useState('desc');
 
   const [showFilters, setShowFilters] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
   const [activeDrawer, setActiveDrawer] = useState<'create' | 'edit' | 'detail' | null>(null);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -152,6 +154,17 @@ export default function ExpensesPage() {
   };
 
   useEffect(() => { fetchExpenses(); }, [page, search, selectedCategories, selectedPaidBy, startDate, endDate, sortBy, sortOrder]);
+
+  // Close export menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+    if (showExportMenu) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showExportMenu]);
 
   const openDetail = async (expense: Expense) => {
     setSelectedExpense(expense);
@@ -425,9 +438,10 @@ export default function ExpensesPage() {
               )}
             </button>
 
-            {/* Export dropdown */}
-            <div style={{ position: 'relative' }} className="group">
+            {/* Export dropdown — click to open/close */}
+            <div ref={exportMenuRef} style={{ position: 'relative' }}>
               <button
+                onClick={() => setShowExportMenu(prev => !prev)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -435,60 +449,63 @@ export default function ExpensesPage() {
                   padding: '9px 14px',
                   borderRadius: '8px',
                   border: '1px solid var(--border)',
-                  backgroundColor: 'transparent',
-                  color: 'var(--text-secondary)',
+                  backgroundColor: showExportMenu ? 'var(--bg-subtle)' : 'transparent',
+                  color: showExportMenu ? 'var(--text-primary)' : 'var(--text-secondary)',
                   fontSize: '13px',
                   fontWeight: 500,
                   cursor: 'pointer',
+                  transition: 'background-color 0.15s ease, color 0.15s ease',
                 }}
               >
                 <Download size={14} />
                 <span>Export</span>
               </button>
-              <div
-                className="hidden group-hover:block"
-                style={{
-                  position: 'absolute',
-                  right: 0,
-                  top: 'calc(100% + 4px)',
-                  width: '180px',
-                  backgroundColor: 'var(--bg-surface)',
-                  border: '1px solid var(--border)',
-                  borderRadius: '10px',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-                  padding: '4px',
-                  zIndex: 50,
-                }}
-              >
-                {[
-                  { fmt: 'xlsx' as const, label: 'Excel (.xlsx)' },
-                  { fmt: 'csv' as const, label: 'CSV (.csv)' },
-                  { fmt: 'md' as const, label: 'Markdown (.md)' },
-                  { fmt: 'pdf' as const, label: 'Print PDF (.pdf)' },
-                ].map(({ fmt, label }) => (
-                  <button
-                    key={fmt}
-                    onClick={() => triggerExport(fmt)}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      padding: '8px 12px',
-                      borderRadius: '7px',
-                      border: 'none',
-                      backgroundColor: 'transparent',
-                      color: fmt === 'pdf' ? 'var(--danger)' : 'var(--text-secondary)',
-                      fontSize: '12px',
-                      fontWeight: 500,
-                      cursor: 'pointer',
-                      transition: 'background-color 0.1s ease',
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-subtle)')}
-                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
+              {showExportMenu && (
+                <div
+                  className="animate-scaleIn"
+                  style={{
+                    position: 'absolute',
+                    right: 0,
+                    top: 'calc(100% + 6px)',
+                    width: '180px',
+                    backgroundColor: 'var(--bg-surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '10px',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.10)',
+                    padding: '4px',
+                    zIndex: 50,
+                  }}
+                >
+                  {[
+                    { fmt: 'xlsx' as const, label: 'Excel (.xlsx)' },
+                    { fmt: 'csv' as const, label: 'CSV (.csv)' },
+                    { fmt: 'md' as const, label: 'Markdown (.md)' },
+                    { fmt: 'pdf' as const, label: 'Print PDF (.pdf)' },
+                  ].map(({ fmt, label }) => (
+                    <button
+                      key={fmt}
+                      onClick={() => { triggerExport(fmt); setShowExportMenu(false); }}
+                      style={{
+                        width: '100%',
+                        textAlign: 'left',
+                        padding: '8px 12px',
+                        borderRadius: '7px',
+                        border: 'none',
+                        backgroundColor: 'transparent',
+                        color: fmt === 'pdf' ? 'var(--danger)' : 'var(--text-secondary)',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        transition: 'background-color 0.1s ease',
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-subtle)')}
+                      onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
