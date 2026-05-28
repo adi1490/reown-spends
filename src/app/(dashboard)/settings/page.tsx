@@ -37,14 +37,21 @@ export default function SettingsPage() {
 
   // Fetch session data and backup status
   useEffect(() => {
-    // 1. Fetch user from session storage
-    const storedUser = sessionStorage.getItem('user_profile');
-    if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
-    } else {
-      // Fallback
-      setCurrentUser({ name: 'Narasimha', email: 'narasimha@reown.sale' });
-    }
+    // 1. Fetch fresh user profile dynamically from API
+    const fetchUserProfile = async () => {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.user) {
+            setCurrentUser(data.user);
+          }
+        }
+      } catch (err) {
+        console.warn('Could not retrieve fresh user profile:', err);
+      }
+    };
+    fetchUserProfile();
 
     // 2. Fetch last backup info
     const fetchBackupInfo = async () => {

@@ -43,28 +43,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [userName, setUserName] = useState('Founder');
   const [userEmail, setUserEmail] = useState('');
 
-  // Hydrate user info from JWT session (read via non-sensitive client side fetch or document cookie parse)
+  // Hydrate user info from JWT session dynamically from the /api/auth/me route
   useEffect(() => {
-    // Attempt to decode userName from cookie or fetch lightweight session info
     const fetchUser = async () => {
       try {
-        // We'll build a lightweight /api/auth/me or retrieve from sessionStorage
-        const storedUser = sessionStorage.getItem('user_profile');
-        if (storedUser) {
-          const parsed = JSON.parse(storedUser);
-          setUserName(parsed.name || 'Founder');
-          setUserEmail(parsed.email || '');
+        const res = await fetch('/api/auth/me');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.user) {
+            setUserName(data.user.name);
+            setUserEmail(data.user.email);
+            sessionStorage.setItem('user_profile', JSON.stringify(data.user));
+          }
         } else {
-          // Fetch from active session
-          const res = await fetch('/api/expenses'); // API returns 401 if unauth, but let's see
-          // We will fetch user info by writing a tiny me route or using a default.
+          router.push('/login');
         }
       } catch (err) {
-        console.warn('Could not retrieve user info:', err);
+        console.warn('Could not retrieve fresh user info:', err);
       }
     };
     fetchUser();
-  }, []);
+  }, [router]);
 
   // Theme support
   useEffect(() => {
