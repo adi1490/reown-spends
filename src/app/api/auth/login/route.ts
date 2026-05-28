@@ -69,22 +69,13 @@ export async function POST(request: Request) {
       }
     });
 
-    const cookieOptions: Record<string, any> = {
-      name: 'reown_spends_session',
-      value: token,
+    response.cookies.set('reown_spends_session', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      path: '/'
-    };
-
-    if (rememberMe) {
-      // 7 days in seconds
-      cookieOptions.maxAge = 7 * 24 * 60 * 60;
-    }
-    // If not rememberMe, we omit maxAge/expires so it becomes a browser-session-only cookie
-
-    response.cookies.set(cookieOptions);
+      path: '/',
+      maxAge: rememberMe ? 7 * 24 * 60 * 60 : undefined
+    });
 
     return response;
   } catch (err: any) {

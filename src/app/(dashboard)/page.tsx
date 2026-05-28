@@ -17,7 +17,8 @@ import {
   ShieldAlert,
   UploadCloud,
   FileText,
-  Image as ImageIcon
+  Image as ImageIcon,
+  X
 } from 'lucide-react';
 import {
   BarChart,
@@ -473,7 +474,7 @@ export default function Dashboard() {
                     contentStyle={{ background: 'var(--bg-surface)', borderColor: 'var(--border)', borderRadius: '16px' }}
                     labelStyle={{ color: 'var(--text-primary)', fontWeight: 'bold', fontSize: '11px' }}
                     itemStyle={{ color: '#feb904', fontWeight: 'bold', fontSize: '12px' }}
-                    formatter={(value) => [`₹${value.toLocaleString('en-IN')}`, 'Monthly Burn']}
+                    formatter={(value: any) => [`₹${value?.toLocaleString('en-IN') || '0.00'}`, 'Monthly Burn']}
                   />
                   <Bar dataKey="amount" fill="#feb904" radius={[6, 6, 0, 0]} maxBarSize={45} />
                 </BarChart>
@@ -553,7 +554,7 @@ export default function Dashboard() {
                     contentStyle={{ background: 'var(--bg-surface)', borderColor: 'var(--border)', borderRadius: '16px' }}
                     labelStyle={{ color: 'var(--text-primary)', fontWeight: 'bold', fontSize: '11px' }}
                     itemStyle={{ color: '#feb904', fontWeight: 'bold', fontSize: '12px' }}
-                    formatter={(value) => [`₹${value.toLocaleString('en-IN')}`, 'Cumulative Spent']}
+                    formatter={(value: any) => [`₹${value?.toLocaleString('en-IN') || '0.00'}`, 'Cumulative Spent']}
                   />
                   <Line type="monotone" dataKey="amount" stroke="#feb904" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
                 </LineChart>
@@ -580,7 +581,7 @@ export default function Dashboard() {
                   <Tooltip 
                     contentStyle={{ background: 'var(--bg-surface)', borderColor: 'var(--border)', borderRadius: '16px' }}
                     itemStyle={{ color: '#feb904', fontWeight: 'bold', fontSize: '12px' }}
-                    formatter={(value) => [`₹${value.toLocaleString('en-IN')}`, 'Funding amount']}
+                    formatter={(value: any) => [`₹${value?.toLocaleString('en-IN') || '0.00'}`, 'Funding amount']}
                   />
                   <Bar dataKey="amount" fill="#feb904" radius={[0, 6, 6, 0]} maxBarSize={30}>
                     {charts.sourceDistribution.map((entry, index) => (
