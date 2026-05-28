@@ -1,16 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  KeyRound, 
-  Database, 
-  Lock, 
-  CheckCircle, 
+import {
+  KeyRound,
+  Database,
+  Lock,
+  CheckCircle,
   AlertTriangle,
-  User, 
+  User,
   ArrowRight,
   ShieldAlert,
-  Server
+  Server,
 } from 'lucide-react';
 
 interface BackupMeta {
@@ -20,6 +20,35 @@ interface BackupMeta {
   size_kb: number;
 }
 
+const card: React.CSSProperties = {
+  backgroundColor: 'var(--bg-surface)',
+  border: '1px solid var(--border)',
+  borderRadius: '12px',
+  padding: '24px',
+};
+
+const sectionLabel: React.CSSProperties = {
+  fontSize: '10px',
+  fontWeight: 700,
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase',
+  color: 'var(--text-muted)',
+  margin: 0,
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '10px 14px',
+  borderRadius: '8px',
+  border: '1px solid var(--border)',
+  backgroundColor: 'var(--bg-base)',
+  color: 'var(--text-primary)',
+  fontSize: '13px',
+  outline: 'none',
+  transition: 'border-color 0.15s ease',
+  fontFamily: 'var(--font-sans)',
+};
+
 export default function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -27,334 +56,352 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  const [currentUser, setCurrentUser] = useState<{ name: string; email: string } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ name: string; username: string } | null>(null);
   const [backupMeta, setBackupMeta] = useState<BackupMeta>({
     exists: false,
     name: 'N/A',
     created_at: 'N/A',
-    size_kb: 0
+    size_kb: 0,
   });
 
-  // Fetch session data and backup status
   useEffect(() => {
-    // 1. Fetch fresh user profile dynamically from API
     const fetchUserProfile = async () => {
       try {
         const res = await fetch('/api/auth/me');
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.user) {
-            setCurrentUser(data.user);
+            setCurrentUser({ name: data.user.name, username: data.user.username });
           }
         }
       } catch (err) {
-        console.warn('Could not retrieve fresh user profile:', err);
+        console.warn('Could not retrieve user profile:', err);
       }
     };
     fetchUserProfile();
 
-    // 2. Fetch last backup info
     const fetchBackupInfo = async () => {
       try {
-        const res = await fetch('/api/backup/last'); // we will implement this API route
+        const res = await fetch('/api/backup/last');
         if (res.ok) {
           const data = await res.json();
-          if (data.exists) {
-            setBackupMeta(data);
-          }
+          if (data.exists) setBackupMeta(data);
         }
       } catch (err) {
-        console.warn('Could not load backup metadata:', err);
+        console.warn('Could not load backup info:', err);
       }
     };
-    
-    // We'll call this after we implement the api
     fetchBackupInfo();
   }, []);
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus(null);
-
     if (newPassword !== confirmPassword) {
       setStatus({ type: 'error', message: 'New passwords do not match.' });
       return;
     }
-
     if (newPassword.length < 8) {
-      setStatus({ type: 'error', message: 'New password must be at least 8 characters long.' });
+      setStatus({ type: 'error', message: 'Password must be at least 8 characters.' });
       return;
     }
-
     setIsLoading(true);
-
     try {
       const res = await fetch('/api/auth/change-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword, newPassword }),
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Password update failed.');
-      }
-
-      setStatus({ type: 'success', message: 'Your password was successfully updated!' });
+      if (!res.ok) throw new Error(data.error || 'Password update failed.');
+      setStatus({ type: 'success', message: 'Password updated successfully.' });
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: any) {
-      setStatus({ type: 'error', message: err.message || 'An error occurred. Please try again.' });
+      setStatus({ type: 'error', message: err.message });
     } finally {
       setIsLoading(false);
     }
   };
 
   const runManualBackup = async () => {
-    // Call manual backup trigger to verify it works
-    const token = prompt('Enter the BACKUP_CRON_SECRET to execute manual database backup:');
+    const token = prompt('Enter BACKUP_CRON_SECRET to trigger manual backup:');
     if (!token) return;
-
     try {
-      const res = await fetch('/api/backup', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const res = await fetch('/api/backup', { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       if (res.ok) {
-        alert('Backup executed successfully! Check storage. Result: ' + JSON.stringify(data));
-        // Refresh backup meta
+        alert('Backup executed successfully.');
         window.location.reload();
       } else {
         alert('Backup failed: ' + (data.error || 'Unauthorized'));
       }
     } catch (err: any) {
-      alert('Error triggering backup: ' + err.message);
+      alert('Error: ' + err.message);
     }
   };
 
+  const getInitials = (name: string) =>
+    name.split(' ').map((n) => n[0]).join('').toUpperCase().substring(0, 2) || '?';
+
   return (
-    <div className="space-y-8 animate-fadeIn">
-      {/* Page Header */}
+    <div className="animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+      {/* Header */}
       <div>
-        <h1 className="font-display text-3xl font-extrabold tracking-tight text-text-primary">
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)', margin: 0 }}>
           Settings
         </h1>
-        <p className="text-sm text-text-secondary mt-1 font-light">
-          Manage your founder profile and system configurations.
+        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '4px 0 0', fontWeight: 300 }}>
+          Manage your profile and system configurations.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Profile Card & Info */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="bg-bg-surface border border-border rounded-2xl p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-text-primary flex items-center gap-2 mb-4">
-              <User size={20} className="text-accent" />
-              <span>Founder Profile</span>
-            </h2>
-            <div className="flex flex-col items-center py-6 text-center border-b border-border mb-6">
-              <div className="w-20 h-20 rounded-2xl bg-bg-subtle border border-border flex items-center justify-center font-bold text-3xl text-accent shadow-inner select-none mb-4">
-                {currentUser ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'F'}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }} className="lg:grid-cols-[280px_1fr]">
+
+        {/* Left column: Profile + System health */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Profile card */}
+          <div style={card}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+              <User size={16} style={{ color: 'var(--accent)' }} />
+              <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Founder Profile</h2>
+            </div>
+
+            {/* Avatar + name */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '20px 0', borderBottom: '1px solid var(--border)', marginBottom: '20px' }}>
+              <div style={{
+                width: '64px', height: '64px', borderRadius: '14px',
+                backgroundColor: 'var(--bg-container)', border: '1px solid var(--border)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: 'var(--font-mono)', fontSize: '22px', fontWeight: 700, color: 'var(--accent)',
+                marginBottom: '12px', userSelect: 'none',
+              }}>
+                {currentUser ? getInitials(currentUser.name) : '?'}
               </div>
-              <p className="text-lg font-bold text-text-primary">{currentUser?.name || 'Founder'}</p>
-              <p className="text-xs text-text-secondary font-light mt-0.5">reOWN Founding Partner</p>
-              <span className="mt-3 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-accent/15 text-[#e0a403] border border-accent/25">
-                Full Admin Privilege
+              <p style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+                {currentUser?.name || 'Loading...'}
+              </p>
+              {currentUser?.username && (
+                <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: '2px 0 4px', fontFamily: 'var(--font-mono)', fontWeight: 400 }}>
+                  @{currentUser.username}
+                </p>
+              )}
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: '1px 0 12px', fontWeight: 300 }}>
+                reOWN Founding Partner
+              </p>
+              <span style={{
+                padding: '4px 12px', borderRadius: '100px', fontSize: '10px', fontWeight: 700,
+                backgroundColor: 'rgba(254,185,4,0.12)', border: '1px solid rgba(254,185,4,0.25)',
+                color: 'var(--accent)', letterSpacing: '0.04em', textTransform: 'uppercase',
+              }}>
+                Full Admin Access
               </span>
             </div>
 
-            <div className="space-y-4">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-text-secondary">Registered Email</p>
-                <p className="text-sm text-text-primary mt-1 font-medium">{currentUser?.email || 'name@reown.sale'}</p>
+                <p style={sectionLabel}>Username</p>
+                <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', margin: '5px 0 0', fontFamily: 'var(--font-mono)' }}>
+                  {currentUser?.username ? `@${currentUser.username}` : '—'}
+                </p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-text-secondary">Role Description</p>
-                <p className="text-sm text-text-primary mt-1 font-light leading-relaxed">
-                  Has equal view/mutate permissions for expense records and full visibility into the company activity ledger.
+                <p style={sectionLabel}>Role</p>
+                <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '5px 0 0', lineHeight: 1.5, fontWeight: 300 }}>
+                  Equal view & write access to all expense records and the full audit ledger.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Infrastructure Health */}
-          <div className="bg-bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-4">
-            <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-              <Server size={20} className="text-accent" />
-              <span>Infrastructure Status</span>
-            </h2>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-bg-subtle border border-border text-sm">
-                <span className="text-text-secondary font-medium">Database Node</span>
-                <span className="flex items-center gap-1.5 font-bold text-[#2e7d32]">
-                  <span className="w-2 h-2 rounded-full bg-[#2e7d32] animate-pulse" />
-                  <span>Always-On</span>
-                </span>
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-bg-subtle border border-border text-sm">
-                <span className="text-text-secondary font-medium">File Storage</span>
-                <span className="flex items-center gap-1.5 font-bold text-[#2e7d32]">
-                  <span className="w-2 h-2 rounded-full bg-[#2e7d32] animate-pulse" />
-                  <span>Connected</span>
-                </span>
-              </div>
+          {/* Infrastructure status */}
+          <div style={card}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+              <Server size={16} style={{ color: 'var(--accent)' }} />
+              <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Infrastructure</h2>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {[
+                { label: 'Database Node', status: 'Always-On' },
+                { label: 'File Storage', status: 'Connected' },
+              ].map(({ label, status }) => (
+                <div key={label} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '10px 14px', borderRadius: '8px',
+                  backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border)',
+                }}>
+                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{label}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: 'var(--success)' }}>
+                    <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: 'var(--success)' }} />
+                    {status}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Change Password Card & System Backups */}
-        <div className="lg:col-span-2 space-y-8">
-          
-          {/* Change Password Form */}
-          <div className="bg-bg-surface border border-border rounded-2xl p-6 md:p-8 shadow-sm">
-            <h2 className="text-lg font-bold text-text-primary flex items-center gap-2 mb-6">
-              <KeyRound size={20} className="text-accent" />
-              <span>Security & Password</span>
-            </h2>
+        {/* Right column: Password + Backups */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Change password */}
+          <div style={card}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+              <KeyRound size={16} style={{ color: 'var(--accent)' }} />
+              <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Security & Password</h2>
+            </div>
 
             {status && (
-              <div className={`mb-6 flex items-start gap-3 p-4 rounded-2xl border text-sm font-medium animate-fadeIn ${
-                status.type === 'success' 
-                  ? 'bg-accent/15 border-accent/25 text-[#cda005] dark:text-[#feb904]' 
-                  : 'bg-danger/10 border-danger/20 text-danger'
-              }`}>
-                {status.type === 'success' ? <CheckCircle size={18} className="shrink-0 mt-0.5" /> : <ShieldAlert size={18} className="shrink-0 mt-0.5" />}
+              <div
+                className="animate-slideDown"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  marginBottom: '20px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  backgroundColor: status.type === 'success' ? 'rgba(46,125,50,0.08)' : 'var(--danger-light)',
+                  border: `1px solid ${status.type === 'success' ? 'rgba(46,125,50,0.25)' : 'rgba(186,26,26,0.25)'}`,
+                  color: status.type === 'success' ? 'var(--success)' : 'var(--danger)',
+                }}
+              >
+                {status.type === 'success' ? <CheckCircle size={16} /> : <ShieldAlert size={16} />}
                 <span>{status.message}</span>
               </div>
             )}
 
-            <form onSubmit={handleChangePassword} className="space-y-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
-                    Current Password
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">
-                      <Lock size={16} />
-                    </span>
-                    <input
-                      type="password"
-                      required
-                      placeholder="Enter your current password"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      disabled={isLoading}
-                      className="w-full pl-12 pr-4 py-3 rounded-2xl border border-border bg-bg-subtle/50 text-text-primary text-sm focus:outline-none focus:border-accent focus:bg-bg-surface focus:ring-4 focus:ring-accent/15 transition-all disabled:opacity-50"
-                    />
-                  </div>
+            <form onSubmit={handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={sectionLabel}>Current Password</label>
+                <div style={{ position: 'relative' }}>
+                  <Lock size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <input
+                    type="password"
+                    placeholder="Your current password"
+                    value={currentPassword}
+                    onChange={e => setCurrentPassword(e.target.value)}
+                    disabled={isLoading}
+                    style={{ ...inputStyle, paddingLeft: '36px' }}
+                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+                    onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
+                  />
                 </div>
+              </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
-                    New Password
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">
-                      <Lock size={16} />
-                    </span>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={sectionLabel}>New Password</label>
+                  <div style={{ position: 'relative' }}>
+                    <Lock size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                     <input
                       type="password"
-                      required
                       placeholder="Min 8 characters"
                       value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
+                      onChange={e => setNewPassword(e.target.value)}
                       disabled={isLoading}
-                      className="w-full pl-12 pr-4 py-3 rounded-2xl border border-border bg-bg-subtle/50 text-text-primary text-sm focus:outline-none focus:border-accent focus:bg-bg-surface focus:ring-4 focus:ring-accent/15 transition-all disabled:opacity-50"
+                      style={{ ...inputStyle, paddingLeft: '36px' }}
+                      onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+                      onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
                     />
                   </div>
                 </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
-                    Confirm New Password
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">
-                      <Lock size={16} />
-                    </span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={sectionLabel}>Confirm New Password</label>
+                  <div style={{ position: 'relative' }}>
+                    <Lock size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                     <input
                       type="password"
-                      required
-                      placeholder="Repeat new password"
+                      placeholder="Repeat password"
                       value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      onChange={e => setConfirmPassword(e.target.value)}
                       disabled={isLoading}
-                      className="w-full pl-12 pr-4 py-3 rounded-2xl border border-border bg-bg-subtle/50 text-text-primary text-sm focus:outline-none focus:border-accent focus:bg-bg-surface focus:ring-4 focus:ring-accent/15 transition-all disabled:opacity-50"
+                      style={{ ...inputStyle, paddingLeft: '36px' }}
+                      onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+                      onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end pt-3">
+              <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '4px' }}>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-6 py-3 rounded-2xl font-bold bg-[#feb904] text-black hover:bg-[#e0a403] focus:ring-4 focus:ring-accent/30 active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer shadow-md shadow-accent/15 flex items-center gap-2"
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '8px',
+                    padding: '10px 22px', borderRadius: '8px', border: 'none',
+                    backgroundColor: 'var(--accent)', color: 'var(--accent-fg)',
+                    fontSize: '13px', fontWeight: 700,
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                    opacity: isLoading ? 0.7 : 1,
+                    transition: 'background-color 0.15s ease',
+                  }}
+                  onMouseEnter={e => { if (!isLoading) e.currentTarget.style.backgroundColor = 'var(--accent-dim)'; }}
+                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--accent)')}
                 >
-                  {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <span>Update Password</span>
-                      <ArrowRight size={16} />
-                    </>
-                  )}
+                  {isLoading ? 'Updating...' : <><span>Update Password</span><ArrowRight size={15} /></>}
                 </button>
               </div>
             </form>
           </div>
 
-          {/* System Data Backup Details */}
-          <div className="bg-bg-surface border border-border rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                <Database size={20} className="text-accent" />
-                <span>Automated Data Backup</span>
-              </h2>
-              
+          {/* Backup card */}
+          <div style={card}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Database size={16} style={{ color: 'var(--accent)' }} />
+                <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Automated Backups</h2>
+              </div>
               <button
                 onClick={runManualBackup}
-                className="self-start sm:self-auto px-4 py-2 text-xs font-bold rounded-xl border border-border hover:bg-bg-subtle text-text-secondary hover:text-text-primary transition-all cursor-pointer shadow-sm hover-lift"
+                style={{
+                  padding: '7px 14px', borderRadius: '8px', border: '1px solid var(--border)',
+                  backgroundColor: 'transparent', color: 'var(--text-secondary)', fontSize: '12px',
+                  fontWeight: 500, cursor: 'pointer', transition: 'background-color 0.15s ease',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-subtle)')}
+                onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
               >
                 Trigger Manual Backup
               </button>
             </div>
 
-            <p className="text-sm text-text-secondary font-light leading-relaxed">
-              Financial data is protected via 3 layers of redundancy: continuous automated point-in-time snapshots in Supabase, daily cron backups (2:00 AM IST) uploaded as secure CSV archives inside private storage, and manual Excel exports.
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 20px', lineHeight: 1.7, fontWeight: 300 }}>
+              Data is protected via continuous Supabase point-in-time snapshots, daily automated CSV backups at 2:00 AM IST, and manual export tools available on the Export page.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-border pt-6">
-              <div className="p-4 rounded-2xl bg-bg-subtle border border-border space-y-1">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Last Auto-Backup Date</p>
-                <p className="text-sm font-bold text-text-primary font-tabular">
-                  {backupMeta.exists ? new Date(backupMeta.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'Pending execution...'}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderTop: '1px solid var(--border)', paddingTop: '20px', marginBottom: '20px' }}>
+              <div style={{ padding: '14px', backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border)', borderRadius: '8px' }}>
+                <p style={sectionLabel}>Last Auto-Backup</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', fontWeight: 500, color: 'var(--text-primary)', margin: '6px 0 0', lineHeight: 1.3 }}>
+                  {backupMeta.exists
+                    ? new Date(backupMeta.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                    : 'Pending execution'}
                 </p>
               </div>
-              <div className="p-4 rounded-2xl bg-bg-subtle border border-border space-y-1">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Latest Archive File</p>
-                <p className="text-sm font-bold text-text-primary truncate" title={backupMeta.name}>
+              <div style={{ padding: '14px', backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border)', borderRadius: '8px' }}>
+                <p style={sectionLabel}>Latest Archive</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 500, color: 'var(--text-primary)', margin: '6px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {backupMeta.name}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-4 rounded-2xl bg-[#feb904]/10 border border-[#feb904]/25 text-[#cda005] dark:text-[#feb904] text-xs">
-              <AlertTriangle size={18} className="shrink-0" />
-              <p className="font-light">
-                Backup archives are stored in a private Supabase Storage bucket (`backups`) and are retained for 30 days. Old records are automatically recycled.
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              padding: '12px 14px', borderRadius: '8px',
+              backgroundColor: 'rgba(254,185,4,0.06)', border: '1px solid rgba(254,185,4,0.20)',
+            }}>
+              <AlertTriangle size={15} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+              <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: 0, fontWeight: 300, lineHeight: 1.5 }}>
+                Backup archives are stored in a private Supabase Storage bucket and retained for 30 days.
               </p>
             </div>
           </div>
-
         </div>
-
       </div>
     </div>
   );

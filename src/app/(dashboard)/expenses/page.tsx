@@ -3,27 +3,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CustomSelect } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
-import { 
-  Search, 
-  Filter, 
-  Plus, 
-  ArrowUpDown, 
-  FileText, 
-  Image as ImageIcon, 
-  Trash2, 
-  Edit3, 
-  X, 
-  Calendar,
-  Layers,
-  CreditCard,
+import {
+  Search,
+  Filter,
+  Plus,
+  ArrowUpDown,
+  FileText,
+  Image as ImageIcon,
+  Trash2,
+  Edit3,
+  X,
   ChevronLeft,
   ChevronRight,
   Download,
   AlertCircle,
-  Eye,
-  Check,
   UploadCloud,
-  FileCheck
+  FileCheck,
+  Check,
 } from 'lucide-react';
 
 interface Expense {
@@ -51,7 +47,7 @@ const CATEGORIES = [
   'Office & Supplies',
   'Banking & Finance',
   'Salaries & Stipends',
-  'Miscellaneous'
+  'Miscellaneous',
 ];
 
 const PAYMENT_SOURCES = [
@@ -59,18 +55,45 @@ const PAYMENT_SOURCES = [
   { value: 'Vishnu (Personal)', label: '👤 Vishnu – Personal' },
   { value: 'Puneet (Personal)', label: '👤 Puneet – Personal' },
   { value: 'Narasimha (Personal)', label: '👤 Narasimha – Personal' },
-  { value: 'Prasanna (Personal)', label: '👤 Prasanna – Personal' }
+  { value: 'Prasanna (Personal)', label: '👤 Prasanna – Personal' },
 ];
 
+// ─── Shared style objects ───
+const card: React.CSSProperties = {
+  backgroundColor: 'var(--bg-surface)',
+  border: '1px solid var(--border)',
+  borderRadius: '12px',
+};
+
+const sectionLabel: React.CSSProperties = {
+  fontSize: '10px',
+  fontWeight: 700,
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase',
+  color: 'var(--text-muted)',
+  margin: 0,
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '9px 13px',
+  borderRadius: '8px',
+  border: '1px solid var(--border)',
+  backgroundColor: 'var(--bg-surface)',
+  color: 'var(--text-primary)',
+  fontSize: '13px',
+  outline: 'none',
+  transition: 'border-color 0.15s ease',
+  fontFamily: 'var(--font-sans)',
+};
+
 export default function ExpensesPage() {
-  // Ledger state
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Search & Filter state
   const [search, setSearch] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedPaidBy, setSelectedPaidBy] = useState<string[]>([]);
@@ -79,13 +102,11 @@ export default function ExpensesPage() {
   const [sortBy, setSortBy] = useState('date');
   const [sortOrder, setSortOrder] = useState('desc');
 
-  // Toggle helpers
   const [showFilters, setShowFilters] = useState(false);
   const [activeDrawer, setActiveDrawer] = useState<'create' | 'edit' | 'detail' | null>(null);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Form inputs state
   const [formDate, setFormDate] = useState('');
   const [formAmount, setFormAmount] = useState('');
   const [formCategory, setFormCategory] = useState(CATEGORIES[0]);
@@ -93,21 +114,16 @@ export default function ExpensesPage() {
   const [formVendor, setFormVendor] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [formNotes, setFormNotes] = useState('');
-  
-  // File Attachment State
-  const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [attachmentPath, setAttachmentPath] = useState<string | null>(null);
   const [attachmentName, setAttachmentName] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [signedReceiptUrl, setSignedReceiptUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formSubmitLoading, setFormSubmitLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // Fetch expense list
   const fetchExpenses = async () => {
     setIsLoading(true);
     try {
@@ -120,9 +136,8 @@ export default function ExpensesPage() {
         startDate,
         endDate,
         sortBy,
-        sortOrder
+        sortOrder,
       });
-
       const res = await fetch(`/api/expenses?${params.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch ledger.');
       const data = await res.json();
@@ -136,32 +151,24 @@ export default function ExpensesPage() {
     }
   };
 
-  useEffect(() => {
-    fetchExpenses();
-  }, [page, search, selectedCategories, selectedPaidBy, startDate, endDate, sortBy, sortOrder]);
+  useEffect(() => { fetchExpenses(); }, [page, search, selectedCategories, selectedPaidBy, startDate, endDate, sortBy, sortOrder]);
 
-  // Open single expense detail
   const openDetail = async (expense: Expense) => {
     setSelectedExpense(expense);
     setSignedReceiptUrl(null);
     setActiveDrawer('detail');
-    
-    // Fetch details with signed receipts
     try {
       const res = await fetch(`/api/expenses/${expense.id}`);
       if (res.ok) {
-        const fullData = await res.json();
-        setSelectedExpense(fullData);
-        if (fullData.receipt_signed_url) {
-          setSignedReceiptUrl(fullData.receipt_signed_url);
-        }
+        const full = await res.json();
+        setSelectedExpense(full);
+        if (full.receipt_signed_url) setSignedReceiptUrl(full.receipt_signed_url);
       }
     } catch (err) {
-      console.error('Error fetching signed receipt:', err);
+      console.error(err);
     }
   };
 
-  // Open Edit Drawer
   const openEdit = (expense: Expense) => {
     setSelectedExpense(expense);
     setFormDate(expense.date);
@@ -173,107 +180,65 @@ export default function ExpensesPage() {
     setFormNotes(expense.notes || '');
     setAttachmentPath(expense.receipt_path);
     setAttachmentName(expense.receipt_name);
-    setAttachmentFile(null);
     setErrors({});
     setActiveDrawer('edit');
   };
 
-  // Open Create Drawer
   const openCreate = () => {
-    // Default form values
-    const todayStr = new Date().toISOString().substring(0, 10);
-    setFormDate(todayStr);
+    setFormDate(new Date().toISOString().substring(0, 10));
     setFormAmount('');
     setFormCategory(CATEGORIES[0]);
     setFormPaidBy(PAYMENT_SOURCES[0].value);
     setFormVendor('');
     setFormDescription('');
     setFormNotes('');
-    setAttachmentFile(null);
     setAttachmentPath(null);
     setAttachmentName(null);
     setErrors({});
     setActiveDrawer('create');
   };
 
-  // Handle file uploads
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    if (file.size > 10 * 1024 * 1024) {
-      alert('File size exceeds the 10 MB limit.');
-      return;
-    }
-
-    const allowed = ['image/jpeg', 'image/png', 'application/pdf'];
-    if (!allowed.includes(file.type)) {
-      alert('Invalid file format. Only JPG, PNG, and PDF are accepted.');
-      return;
-    }
-
-    setAttachmentFile(file);
+    if (file.size > 10 * 1024 * 1024) { alert('File exceeds 10 MB.'); return; }
     setIsUploading(true);
-
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      });
-
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Upload failed.');
-
       setAttachmentPath(data.path);
       setAttachmentName(data.name);
     } catch (err: any) {
       alert('Upload error: ' + err.message);
-      setAttachmentFile(null);
     } finally {
       setIsUploading(false);
     }
   };
 
-  const removeAttachment = () => {
-    setAttachmentFile(null);
-    setAttachmentPath(null);
-    setAttachmentName(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  // Validate inputs
   const validateForm = () => {
     const errs: Record<string, string> = {};
     if (!formDate) errs.date = 'Date is required.';
     else {
       const d = new Date(formDate);
-      const today = new Date();
-      today.setHours(23,59,59,999);
+      const today = new Date(); today.setHours(23, 59, 59, 999);
       if (d > today) errs.date = 'Date cannot be in the future.';
     }
-
     const amt = parseFloat(formAmount);
     if (isNaN(amt) || amt <= 0) errs.amount = 'Amount must be greater than 0.';
-    if (!formVendor.trim()) errs.vendor = 'Vendor is required.';
-    else if (formVendor.length > 120) errs.vendor = 'Vendor cannot exceed 120 characters.';
-
+    if (!formVendor.trim()) errs.vendor = 'Paid To is required.';
+    else if (formVendor.length > 120) errs.vendor = 'Cannot exceed 120 characters.';
     if (!formDescription.trim()) errs.description = 'Description is required.';
-    else if (formDescription.length > 500) errs.description = 'Description cannot exceed 500 characters.';
-
-    if (formNotes.length > 500) errs.notes = 'Notes cannot exceed 500 characters.';
-
+    else if (formDescription.length > 500) errs.description = 'Cannot exceed 500 characters.';
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
-  // Submit Expense Create/Update
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-
     setFormSubmitLoading(true);
     try {
       const payload = {
@@ -285,23 +250,15 @@ export default function ExpensesPage() {
         description: formDescription.trim(),
         notes: formNotes.trim() || null,
         receipt_path: attachmentPath,
-        receipt_name: attachmentName
+        receipt_name: attachmentName,
       };
-
       const isEdit = activeDrawer === 'edit';
-      const endpoint = isEdit ? `/api/expenses/${selectedExpense?.id}` : '/api/expenses';
-      const method = isEdit ? 'PUT' : 'POST';
-
-      const res = await fetch(endpoint, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
+      const res = await fetch(
+        isEdit ? `/api/expenses/${selectedExpense?.id}` : '/api/expenses',
+        { method: isEdit ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
+      );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Operation failed.');
-
-      // Refresh and close
       fetchExpenses();
       setActiveDrawer(null);
     } catch (err: any) {
@@ -311,16 +268,12 @@ export default function ExpensesPage() {
     }
   };
 
-  // Delete Expense
   const handleDelete = async () => {
     if (!selectedExpense) return;
     setDeleteLoading(true);
     try {
-      const res = await fetch(`/api/expenses/${selectedExpense.id}`, {
-        method: 'DELETE'
-      });
+      const res = await fetch(`/api/expenses/${selectedExpense.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Delete failed.');
-
       setShowDeleteConfirm(false);
       setActiveDrawer(null);
       fetchExpenses();
@@ -331,161 +284,243 @@ export default function ExpensesPage() {
     }
   };
 
-  // Multi-select helpers
-  const handleCategoryToggle = (cat: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
-    );
-    setPage(1);
-  };
+  const getSourceLabel = (val: string) =>
+    PAYMENT_SOURCES.find((p) => p.value === val)?.label || val;
 
-  const handlePaidByToggle = (source: string) => {
-    setSelectedPaidBy(prev => 
-      prev.includes(source) ? prev.filter(s => s !== source) : [...prev, source]
-    );
-    setPage(1);
-  };
-
-  // Trigger browser download for exports
   const triggerExport = (format: 'xlsx' | 'csv' | 'md' | 'pdf') => {
-    const params = new URLSearchParams({
-      format,
-      search,
-      categories: selectedCategories.join(','),
-      paid_by: selectedPaidBy.join(','),
-      startDate,
-      endDate
-    });
-    
-    // Open in new tab or download
+    const params = new URLSearchParams({ format, search, categories: selectedCategories.join(','), paid_by: selectedPaidBy.join(','), startDate, endDate });
     window.open(`/api/expenses/export?${params.toString()}`, '_blank');
   };
 
-  const getSourceLabel = (val: string) => {
-    return PAYMENT_SOURCES.find(p => p.value === val)?.label || val;
+  const sortIcon = (field: string) => sortBy === field
+    ? <ArrowUpDown size={12} style={{ color: 'var(--accent)' }} />
+    : <ArrowUpDown size={12} style={{ color: 'var(--text-muted)', opacity: 0.5 }} />;
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    else { setSortBy(field); setSortOrder('desc'); }
   };
 
+  // ─── Shared drawer panel ───
+  const DrawerOverlay = ({ children }: { children: React.ReactNode }) => (
+    <div
+      className="animate-fadeIn"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 50,
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        display: 'flex',
+        justifyContent: 'flex-end',
+      }}
+    >
+      <div style={{ flex: 1 }} onClick={() => setActiveDrawer(null)} />
+      <div
+        className="animate-slideLeft"
+        style={{
+          width: '100%',
+          maxWidth: '500px',
+          height: '100%',
+          backgroundColor: 'var(--bg-surface)',
+          borderLeft: '1px solid var(--border)',
+          display: 'flex',
+          flexDirection: 'column',
+          overflowY: 'auto',
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="space-y-6 animate-fadeIn relative">
-      
-      {/* 1. Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+      {/* ─── Page Header ─── */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
         <div>
-          <h1 className="font-display text-3xl font-extrabold tracking-tight text-text-primary">
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)', margin: 0 }}>
             Expense Ledger
           </h1>
-          <p className="text-sm text-text-secondary mt-1 font-light">
-            View, search, filter, and export the startup expense registers.
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '4px 0 0', fontWeight: 300 }}>
+            View, search, filter, and export expense records.
           </p>
         </div>
 
         <button
           onClick={openCreate}
-          className="self-start sm:self-auto px-5 py-3 rounded-2xl bg-accent text-accent-fg font-bold hover:bg-[#e0a403] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-accent/15"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '10px 20px',
+            borderRadius: '10px',
+            border: 'none',
+            backgroundColor: 'var(--accent)',
+            color: 'var(--accent-fg)',
+            fontSize: '13px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            transition: 'background-color 0.15s ease',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--accent-dim)')}
+          onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--accent)')}
         >
-          <Plus size={18} />
+          <Plus size={16} />
           <span>Add Expense</span>
         </button>
       </div>
 
-      {/* 2. Search & Toolbar Controls */}
-      <div className="bg-bg-surface border border-border rounded-2xl p-4 shadow-sm space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          {/* Full Text Search Input */}
-          <div className="relative flex-1 max-w-md">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">
-              <Search size={18} />
-            </span>
+      {/* ─── Search & Toolbar ─── */}
+      <div style={{ ...card, padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+          {/* Search input */}
+          <div style={{ position: 'relative', flex: 1, minWidth: '220px', maxWidth: '380px' }}>
+            <Search size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
             <input
               type="text"
-              placeholder="Search vendor, description, notes..."
+              placeholder="Search vendor, description..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="w-full pl-12 pr-4 py-2.5 rounded-2xl border border-border bg-bg-subtle/50 text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-accent focus:bg-bg-surface focus:ring-4 focus:ring-accent/15 transition-all"
+              style={{ ...inputStyle, paddingLeft: '36px' }}
+              onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+              onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
             />
           </div>
 
-          <div className="flex items-center gap-3 self-end md:self-auto">
-            {/* Filter Toggle Button */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Filter button */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`px-4 py-2.5 rounded-xl border text-sm font-semibold flex items-center gap-2 transition-all cursor-pointer ${
-                showFilters || selectedCategories.length > 0 || selectedPaidBy.length > 0 || startDate || endDate
-                  ? 'bg-accent/10 border-accent text-[#cda005] dark:text-[#feb904]'
-                  : 'border-border text-text-secondary hover:text-text-primary hover:bg-bg-subtle'
-              }`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '9px 14px',
+                borderRadius: '8px',
+                border: '1px solid',
+                fontSize: '13px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                borderColor: (showFilters || selectedCategories.length > 0 || selectedPaidBy.length > 0 || startDate || endDate)
+                  ? 'var(--accent)' : 'var(--border)',
+                backgroundColor: (showFilters || selectedCategories.length > 0 || selectedPaidBy.length > 0 || startDate || endDate)
+                  ? 'rgba(254,185,4,0.08)' : 'transparent',
+                color: (showFilters || selectedCategories.length > 0 || selectedPaidBy.length > 0 || startDate || endDate)
+                  ? 'var(--text-primary)' : 'var(--text-secondary)',
+              }}
             >
-              <Filter size={16} />
+              <Filter size={14} />
               <span>Filters</span>
               {(selectedCategories.length + selectedPaidBy.length + (startDate ? 1 : 0) + (endDate ? 1 : 0)) > 0 && (
-                <span className="w-5 h-5 rounded-full bg-accent text-accent-fg flex items-center justify-center text-[10px] font-bold">
+                <span style={{
+                  width: '18px', height: '18px', borderRadius: '50%',
+                  backgroundColor: 'var(--accent)', color: 'var(--accent-fg)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '9px', fontWeight: 800,
+                }}>
                   {selectedCategories.length + selectedPaidBy.length + (startDate ? 1 : 0) + (endDate ? 1 : 0)}
                 </span>
               )}
             </button>
 
-            {/* Export Dropdown Trigger Button */}
-            <div className="relative group">
+            {/* Export dropdown */}
+            <div style={{ position: 'relative' }} className="group">
               <button
-                className="px-4 py-2.5 rounded-xl border border-border hover:bg-bg-subtle text-text-secondary hover:text-text-primary text-sm font-semibold flex items-center gap-2 transition-all cursor-pointer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '9px 14px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border)',
+                  backgroundColor: 'transparent',
+                  color: 'var(--text-secondary)',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                }}
               >
-                <Download size={16} />
-                <span>Export View</span>
+                <Download size={14} />
+                <span>Export</span>
               </button>
-              
-              {/* Dropdown Menu */}
-              <div className="absolute right-0 top-full mt-2 w-48 rounded-2xl bg-bg-surface border border-border shadow-lg p-2 hidden group-hover:block hover:block z-50 animate-fadeIn">
-                <button 
-                  onClick={() => triggerExport('xlsx')} 
-                  className="w-full text-left px-4 py-2 rounded-xl text-xs text-text-secondary hover:text-text-primary hover:bg-bg-subtle cursor-pointer font-medium flex items-center gap-2"
-                >
-                  Excel Worksheet (.xlsx)
-                </button>
-                <button 
-                  onClick={() => triggerExport('csv')} 
-                  className="w-full text-left px-4 py-2 rounded-xl text-xs text-text-secondary hover:text-text-primary hover:bg-bg-subtle cursor-pointer font-medium flex items-center gap-2"
-                >
-                  Plain Data CSV (.csv)
-                </button>
-                <button 
-                  onClick={() => triggerExport('md')} 
-                  className="w-full text-left px-4 py-2 rounded-xl text-xs text-text-secondary hover:text-text-primary hover:bg-bg-subtle cursor-pointer font-medium flex items-center gap-2"
-                >
-                  Markdown Table (.md)
-                </button>
-                <button 
-                  onClick={() => triggerExport('pdf')} 
-                  className="w-full text-left px-4 py-2 rounded-xl text-xs text-text-secondary hover:text-text-primary hover:bg-bg-subtle cursor-pointer font-medium flex items-center gap-2 animate-pulse text-[#d94f3d] dark:text-[#e05c4a]"
-                >
-                  A4 Print PDF (.pdf)
-                </button>
+              <div
+                className="hidden group-hover:block"
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: 'calc(100% + 4px)',
+                  width: '180px',
+                  backgroundColor: 'var(--bg-surface)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '10px',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+                  padding: '4px',
+                  zIndex: 50,
+                }}
+              >
+                {[
+                  { fmt: 'xlsx' as const, label: 'Excel (.xlsx)' },
+                  { fmt: 'csv' as const, label: 'CSV (.csv)' },
+                  { fmt: 'md' as const, label: 'Markdown (.md)' },
+                  { fmt: 'pdf' as const, label: 'Print PDF (.pdf)' },
+                ].map(({ fmt, label }) => (
+                  <button
+                    key={fmt}
+                    onClick={() => triggerExport(fmt)}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '8px 12px',
+                      borderRadius: '7px',
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      color: fmt === 'pdf' ? 'var(--danger)' : 'var(--text-secondary)',
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      transition: 'background-color 0.1s ease',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-subtle)')}
+                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
             </div>
-
           </div>
         </div>
 
-        {/* 2b. Expandable Advanced Filter Drawer */}
+        {/* Advanced filters panel */}
         {showFilters && (
-          <div className="border-t border-border pt-4 grid grid-cols-1 md:grid-cols-3 gap-6 animate-slideDown">
-            {/* Category Multi-select */}
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
-                <Layers size={12} />
-                <span>Categories</span>
-              </label>
-              <div className="flex flex-wrap gap-2 max-h-[140px] overflow-y-auto p-1 border border-border/40 rounded-2xl bg-bg-subtle/30">
+          <div
+            className="animate-slideDown"
+            style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}
+          >
+            {/* Category multi-select chips */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <p style={sectionLabel}>Categories</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', padding: '10px', border: '1px solid var(--border)', borderRadius: '8px', backgroundColor: 'var(--bg-base)', maxHeight: '130px', overflowY: 'auto' }}>
                 {CATEGORIES.map(cat => {
                   const active = selectedCategories.includes(cat);
                   return (
                     <button
                       key={cat}
-                      onClick={() => handleCategoryToggle(cat)}
-                      className={`px-3 py-1 rounded-xl text-xs transition-all cursor-pointer border ${
-                        active 
-                          ? 'bg-accent/15 border-accent text-[#cda005] dark:text-[#feb904] font-bold' 
-                          : 'border-border bg-bg-surface text-text-secondary hover:bg-bg-subtle'
-                      }`}
+                      onClick={() => { setSelectedCategories(prev => active ? prev.filter(c => c !== cat) : [...prev, cat]); setPage(1); }}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '100px',
+                        border: '1px solid',
+                        fontSize: '11px',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.1s ease',
+                        borderColor: active ? 'var(--accent)' : 'var(--border)',
+                        backgroundColor: active ? 'rgba(254,185,4,0.10)' : 'var(--bg-surface)',
+                        color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
+                      }}
                     >
                       {cat}
                     </button>
@@ -494,178 +529,192 @@ export default function ExpensesPage() {
               </div>
             </div>
 
-            {/* Paid By Multi-select */}
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
-                <CreditCard size={12} />
-                <span>Payment Sources</span>
-              </label>
-              <div className="flex flex-col gap-1.5 p-2 border border-border/40 rounded-2xl bg-bg-subtle/30 max-h-[140px] overflow-y-auto">
-                {PAYMENT_SOURCES.map(source => {
-                  const active = selectedPaidBy.includes(source.value);
+            {/* Payment sources */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <p style={sectionLabel}>Payment Sources</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '6px', border: '1px solid var(--border)', borderRadius: '8px', backgroundColor: 'var(--bg-base)', maxHeight: '130px', overflowY: 'auto' }}>
+                {PAYMENT_SOURCES.map(src => {
+                  const active = selectedPaidBy.includes(src.value);
                   return (
                     <button
-                      key={source.value}
-                      onClick={() => handlePaidByToggle(source.value)}
-                      className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-all cursor-pointer border flex items-center justify-between ${
-                        active 
-                          ? 'bg-accent/15 border-accent text-[#cda005] dark:text-[#feb904] font-bold' 
-                          : 'border-border bg-bg-surface text-text-secondary hover:bg-bg-subtle'
-                      }`}
+                      key={src.value}
+                      onClick={() => { setSelectedPaidBy(prev => active ? prev.filter(s => s !== src.value) : [...prev, src.value]); setPage(1); }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '7px 10px',
+                        borderRadius: '7px',
+                        border: '1px solid',
+                        fontSize: '12px',
+                        fontWeight: 400,
+                        cursor: 'pointer',
+                        transition: 'all 0.1s ease',
+                        borderColor: active ? 'var(--accent)' : 'var(--border)',
+                        backgroundColor: active ? 'rgba(254,185,4,0.08)' : 'var(--bg-surface)',
+                        color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
+                      }}
                     >
-                      <span>{source.label}</span>
-                      {active && <Check size={12} className="text-[#feb904]" />}
+                      <span>{src.label}</span>
+                      {active && <Check size={11} style={{ color: 'var(--accent)', flexShrink: 0 }} />}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Date Range Picker */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
-                  <Calendar size={12} />
-                  <span>Date Range</span>
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <p className="text-[9px] text-text-muted">Start Date</p>
-                    <DatePicker
-                      value={startDate}
-                      onChange={(val) => { setStartDate(val); setPage(1); }}
-                      placeholder="Start Date"
-                      className="p-2"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[9px] text-text-muted">End Date</p>
-                    <DatePicker
-                      value={endDate}
-                      onChange={(val) => { setEndDate(val); setPage(1); }}
-                      placeholder="End Date"
-                      className="p-2"
-                    />
-                  </div>
+            {/* Date range */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <p style={sectionLabel}>Date Range</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div>
+                  <p style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px', marginTop: 0 }}>From</p>
+                  <DatePicker value={startDate} onChange={(v) => { setStartDate(v); setPage(1); }} placeholder="Start date" />
                 </div>
+                <div>
+                  <p style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px', marginTop: 0 }}>To</p>
+                  <DatePicker value={endDate} onChange={(v) => { setEndDate(v); setPage(1); }} placeholder="End date" />
+                </div>
+                {(selectedCategories.length > 0 || selectedPaidBy.length > 0 || startDate || endDate) && (
+                  <button
+                    onClick={() => { setSelectedCategories([]); setSelectedPaidBy([]); setStartDate(''); setEndDate(''); setPage(1); }}
+                    style={{
+                      padding: '8px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(186,26,26,0.3)',
+                      backgroundColor: 'transparent',
+                      color: 'var(--danger)',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'background-color 0.1s ease',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--danger-light)')}
+                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  >
+                    Clear All Filters
+                  </button>
+                )}
               </div>
-
-              {(selectedCategories.length > 0 || selectedPaidBy.length > 0 || startDate || endDate) && (
-                <button
-                  onClick={() => {
-                    setSelectedCategories([]);
-                    setSelectedPaidBy([]);
-                    setStartDate('');
-                    setEndDate('');
-                    setPage(1);
-                  }}
-                  className="w-full text-center py-2 rounded-xl text-xs border border-danger/30 hover:bg-danger/10 text-danger font-bold cursor-pointer transition-all"
-                >
-                  Clear Active Filters
-                </button>
-              )}
             </div>
-
           </div>
         )}
       </div>
 
-      {/* 3. Expense Ledger Data Table / List */}
-      <div className="bg-bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
-        
+      {/* ─── Expense Table ─── */}
+      <div style={{ ...card, overflow: 'hidden' }}>
         {isLoading ? (
-          /* Loading skeletons */
-          <div className="p-8 space-y-4">
+          <div style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-14 w-full bg-bg-subtle animate-pulse rounded-2xl" />
+              <div key={i} style={{ height: '52px', backgroundColor: 'var(--bg-subtle)', borderRadius: '8px', opacity: 1 - i * 0.1 }} />
             ))}
           </div>
         ) : expenses.length === 0 ? (
-          /* Empty State */
-          <div className="py-16 text-center space-y-4">
-            <div className="inline-flex p-4 bg-bg-subtle border border-border rounded-2xl text-text-secondary mb-2">
-              <AlertCircle size={32} />
+          <div style={{ padding: '64px 32px', textAlign: 'center' }}>
+            <div style={{ display: 'inline-flex', padding: '16px', backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border)', borderRadius: '12px', marginBottom: '16px' }}>
+              <AlertCircle size={28} style={{ color: 'var(--text-muted)' }} />
             </div>
-            <h3 className="text-lg font-bold text-text-primary">No records found</h3>
-            <p className="text-sm text-text-secondary font-light max-w-sm mx-auto">
-              We couldn't find any expenses matching your active filters or query. Try refining your parameters!
+            <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>No records found</h3>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, fontWeight: 300 }}>
+              No expenses match your current filters or search query.
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' }}>
               <thead>
-                <tr className="border-b border-border bg-bg-subtle/30">
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-wider text-text-secondary cursor-pointer select-none" onClick={() => { setSortBy('date'); setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc'); }}>
-                    <div className="flex items-center gap-1.5">
-                      <span>Date</span>
-                      {sortBy === 'date' && <ArrowUpDown size={12} className="text-accent" />}
-                    </div>
-                  </th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-wider text-text-secondary">Paid To</th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-wider text-text-secondary cursor-pointer select-none" onClick={() => { setSortBy('category'); setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc'); }}>
-                    <div className="flex items-center gap-1.5">
-                      <span>Category</span>
-                      {sortBy === 'category' && <ArrowUpDown size={12} className="text-accent" />}
-                    </div>
-                  </th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-wider text-text-secondary cursor-pointer select-none" onClick={() => { setSortBy('paid_by'); setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc'); }}>
-                    <div className="flex items-center gap-1.5">
-                      <span>Paid From</span>
-                      {sortBy === 'paid_by' && <ArrowUpDown size={12} className="text-accent" />}
-                    </div>
-                  </th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-wider text-text-secondary text-right cursor-pointer select-none" onClick={() => { setSortBy('amount'); setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc'); }}>
-                    <div className="flex items-center gap-1.5 justify-end">
-                      <span>Amount (INR)</span>
-                      {sortBy === 'amount' && <ArrowUpDown size={12} className="text-accent" />}
-                    </div>
-                  </th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-wider text-text-secondary text-center">Receipt</th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-wider text-text-secondary">Logged By</th>
+                <tr style={{ backgroundColor: 'var(--bg-subtle)', borderBottom: '1px solid var(--border)' }}>
+                  {[
+                    { label: 'Date', field: 'date' },
+                    { label: 'Paid To', field: null },
+                    { label: 'Category', field: 'category' },
+                    { label: 'Paid From', field: 'paid_by' },
+                    { label: 'Amount (INR)', field: 'amount', right: true },
+                    { label: 'Receipt', field: null, center: true },
+                    { label: 'Logged By', field: null },
+                  ].map(({ label, field, right, center }) => (
+                    <th
+                      key={label}
+                      onClick={field ? () => handleSort(field) : undefined}
+                      style={{
+                        padding: '12px 16px',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase',
+                        color: 'var(--text-muted)',
+                        textAlign: right ? 'right' : center ? 'center' : 'left',
+                        cursor: field ? 'pointer' : 'default',
+                        userSelect: 'none',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        {label}
+                        {field && sortIcon(field)}
+                      </span>
+                    </th>
+                  ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/60">
-                {expenses.map((expense) => (
-                  <tr 
+              <tbody>
+                {expenses.map((expense, i) => (
+                  <tr
                     key={expense.id}
                     onClick={() => openDetail(expense)}
-                    className="hover-lift hover:bg-bg-subtle/50 transition-all duration-300 cursor-pointer text-sm"
+                    style={{
+                      borderBottom: i < expenses.length - 1 ? '1px solid var(--border)' : 'none',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.12s ease',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-subtle)')}
+                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
-                    {/* Date */}
-                    <td className="p-4 font-tabular text-text-secondary font-medium">
+                    <td style={{ padding: '14px 16px', fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
                       {new Date(expense.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </td>
-                    {/* Vendor */}
-                    <td className="p-4 font-bold text-text-primary truncate max-w-[150px]">
+                    <td style={{ padding: '14px 16px', fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {expense.vendor}
                     </td>
-                    {/* Category */}
-                    <td className="p-4">
-                      <span className="px-2.5 py-1 text-[11px] font-medium rounded-full bg-bg-subtle text-text-secondary border border-border/80">
+                    <td style={{ padding: '14px 16px' }}>
+                      <span style={{
+                        display: 'inline-block',
+                        padding: '3px 10px',
+                        borderRadius: '100px',
+                        fontSize: '10px',
+                        fontWeight: 600,
+                        letterSpacing: '0.03em',
+                        backgroundColor: 'var(--bg-container)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text-secondary)',
+                        whiteSpace: 'nowrap',
+                      }}>
                         {expense.category}
                       </span>
                     </td>
-                    {/* Paid By */}
-                    <td className="p-4 text-xs font-medium text-text-secondary truncate max-w-[160px]">
+                    <td style={{ padding: '14px 16px', fontSize: '12px', color: 'var(--text-secondary)', maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {getSourceLabel(expense.paid_by)}
                     </td>
-                    {/* Amount */}
-                    <td className="p-4 text-right font-bold font-tabular text-text-primary">
-                      ₹{expense.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    <td style={{ padding: '14px 16px', textAlign: 'right', fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
+                      ₹{expense.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </td>
-                    {/* Attachment Icon */}
-                    <td className="p-4 text-center">
+                    <td style={{ padding: '14px 16px', textAlign: 'center' }}>
                       {expense.receipt_path ? (
-                        <span className="inline-flex p-1.5 rounded-lg bg-accent/10 border border-accent/25 text-[#cda005] dark:text-[#feb904]">
-                          {expense.receipt_name?.endsWith('.pdf') ? <FileText size={16} /> : <ImageIcon size={16} />}
+                        <span style={{
+                          display: 'inline-flex',
+                          padding: '5px',
+                          borderRadius: '7px',
+                          backgroundColor: 'rgba(254,185,4,0.10)',
+                          border: '1px solid rgba(254,185,4,0.25)',
+                          color: 'var(--accent)',
+                        }}>
+                          {expense.receipt_name?.endsWith('.pdf') ? <FileText size={14} /> : <ImageIcon size={14} />}
                         </span>
                       ) : (
-                        <span className="text-text-muted text-xs">—</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>—</span>
                       )}
                     </td>
-                    {/* Logged By */}
-                    <td className="p-4 text-xs text-text-secondary font-light">
+                    <td style={{ padding: '14px 16px', fontSize: '11px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
                       {expense.logged_by_name}
                     </td>
                   </tr>
@@ -675,407 +724,410 @@ export default function ExpensesPage() {
           </div>
         )}
 
-        {/* Pagination Footer */}
+        {/* Pagination */}
         {!isLoading && expenses.length > 0 && (
-          <div className="flex items-center justify-between p-4 border-t border-border bg-bg-subtle/20 text-xs">
-            <span className="text-text-secondary font-light">
-              Showing <span className="font-bold text-text-primary font-tabular">{(page - 1) * 25 + 1}</span> to{' '}
-              <span className="font-bold text-text-primary font-tabular">{Math.min(page * 25, totalCount)}</span> of{' '}
-              <span className="font-bold text-text-primary font-tabular">{totalCount}</span> entries
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            borderTop: '1px solid var(--border)',
+            backgroundColor: 'var(--bg-subtle)',
+            fontSize: '12px',
+          }}>
+            <span style={{ color: 'var(--text-secondary)' }}>
+              Showing{' '}
+              <strong style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{(page - 1) * 25 + 1}</strong>
+              {' '}–{' '}
+              <strong style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{Math.min(page * 25, totalCount)}</strong>
+              {' '}of{' '}
+              <strong style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{totalCount}</strong>
+              {' '}entries
             </span>
-
-            <div className="flex items-center gap-2">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <button
                 onClick={() => setPage(p => Math.max(p - 1, 1))}
                 disabled={page === 1}
-                className="p-1.5 rounded-lg border border-border bg-bg-surface text-text-secondary disabled:opacity-50 disabled:pointer-events-none hover:bg-bg-subtle cursor-pointer transition-all"
+                style={{
+                  padding: '6px',
+                  borderRadius: '7px',
+                  border: '1px solid var(--border)',
+                  backgroundColor: 'var(--bg-surface)',
+                  color: 'var(--text-secondary)',
+                  cursor: page === 1 ? 'not-allowed' : 'pointer',
+                  opacity: page === 1 ? 0.4 : 1,
+                  display: 'flex',
+                }}
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft size={15} />
               </button>
-              <span className="font-bold font-tabular px-2">
-                Page {page} of {totalPages}
+              <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--text-primary)', padding: '0 8px' }}>
+                {page} / {totalPages}
               </span>
               <button
                 onClick={() => setPage(p => Math.min(p + 1, totalPages))}
                 disabled={page === totalPages}
-                className="p-1.5 rounded-lg border border-border bg-bg-surface text-text-secondary disabled:opacity-50 disabled:pointer-events-none hover:bg-bg-subtle cursor-pointer transition-all"
+                style={{
+                  padding: '6px',
+                  borderRadius: '7px',
+                  border: '1px solid var(--border)',
+                  backgroundColor: 'var(--bg-surface)',
+                  color: 'var(--text-secondary)',
+                  cursor: page === totalPages ? 'not-allowed' : 'pointer',
+                  opacity: page === totalPages ? 0.4 : 1,
+                  display: 'flex',
+                }}
               >
-                <ChevronRight size={16} />
+                <ChevronRight size={15} />
               </button>
             </div>
           </div>
         )}
       </div>
 
-      {/* 4. EXPENSE DETAILS DRAWER */}
+      {/* ─── Detail Drawer ─── */}
       {activeDrawer === 'detail' && selectedExpense && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs animate-fadeIn">
-          {/* Close click area */}
-          <div className="flex-1" onClick={() => setActiveDrawer(null)} />
-          
-          <div className="w-full max-w-[500px] h-full bg-bg-surface border-l border-border flex flex-col shadow-2xl animate-slideLeft transition-colors duration-300">
-            {/* Header */}
-            <div className="p-6 border-b border-border flex items-center justify-between bg-bg-subtle/30">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
-                  Expense Summary
-                </span>
-                <h2 className="text-xl font-bold text-text-primary truncate mt-0.5" title={selectedExpense.vendor}>
-                  {selectedExpense.vendor}
-                </h2>
-              </div>
-              <button 
-                onClick={() => setActiveDrawer(null)}
-                className="p-2 rounded-xl border border-border text-text-secondary hover:text-text-primary hover:bg-bg-subtle cursor-pointer transition-all"
-              >
-                <X size={18} />
-              </button>
+        <DrawerOverlay>
+          <div style={{ padding: '24px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+            <div style={{ minWidth: 0 }}>
+              <p style={sectionLabel}>Expense Summary</p>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', margin: '4px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {selectedExpense.vendor}
+              </h2>
+            </div>
+            <button
+              onClick={() => setActiveDrawer(null)}
+              style={{ padding: '8px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer', flexShrink: 0 }}
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div style={{ flex: 1, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', overflowY: 'auto' }}>
+            {/* Amount display */}
+            <div style={{ textAlign: 'center', padding: '24px 16px', backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border)', borderRadius: '12px' }}>
+              <p style={{ ...sectionLabel, textAlign: 'center', marginBottom: '8px' }}>Total Transacted</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '32px', fontWeight: 500, letterSpacing: '-0.03em', color: 'var(--text-primary)', margin: 0 }}>
+                ₹{selectedExpense.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+              </p>
             </div>
 
-            {/* Content body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {/* Giant Amount Display */}
-              <div className="text-center py-6 px-4 rounded-2xl bg-bg-subtle/50 border border-border/80">
-                <span className="text-xs text-text-secondary font-light uppercase tracking-wider">Total Transacted</span>
-                <p className="text-3xl font-extrabold text-text-primary font-tabular mt-1.5">
-                  ₹{selectedExpense.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            {/* Data grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div>
+                <p style={sectionLabel}>Transaction Date</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)', margin: '6px 0 0' }}>
+                  {new Date(selectedExpense.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}
                 </p>
               </div>
+              <div>
+                <p style={sectionLabel}>Category</p>
+                <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)', margin: '6px 0 0' }}>
+                  {selectedExpense.category}
+                </p>
+              </div>
+            </div>
 
-              {/* Data Grid */}
-              <div className="grid grid-cols-2 gap-5 text-sm">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Transaction Date</p>
-                  <p className="text-text-primary mt-1 font-semibold font-tabular">
-                    {new Date(selectedExpense.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+              <p style={sectionLabel}>Paid From</p>
+              <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)', margin: '6px 0 0' }}>
+                {getSourceLabel(selectedExpense.paid_by)}
+              </p>
+            </div>
+
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+              <p style={sectionLabel}>Description</p>
+              <p style={{ fontSize: '13px', color: 'var(--text-primary)', margin: '6px 0 0', lineHeight: 1.6, fontWeight: 300 }}>
+                {selectedExpense.description}
+              </p>
+            </div>
+
+            {selectedExpense.notes && (
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                <p style={sectionLabel}>Internal Notes</p>
+                <p style={{
+                  fontSize: '12px',
+                  color: 'var(--text-primary)',
+                  margin: '6px 0 0',
+                  lineHeight: 1.6,
+                  fontStyle: 'italic',
+                  padding: '12px',
+                  backgroundColor: 'rgba(254,185,4,0.06)',
+                  border: '1px solid rgba(254,185,4,0.15)',
+                  borderRadius: '8px',
+                }}>
+                  {selectedExpense.notes}
+                </p>
+              </div>
+            )}
+
+            {/* Receipt */}
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+              <p style={sectionLabel}>Receipt / Invoice</p>
+              {selectedExpense.receipt_path ? (
+                <div style={{ marginTop: '10px', padding: '16px', backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border)', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ padding: '10px', borderRadius: '8px', backgroundColor: 'rgba(254,185,4,0.12)', color: 'var(--accent)', flexShrink: 0 }}>
+                      {selectedExpense.receipt_name?.endsWith('.pdf') ? <FileText size={18} /> : <ImageIcon size={18} />}
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {selectedExpense.receipt_name}
+                      </p>
+                      <p style={{ fontSize: '10px', color: 'var(--text-muted)', margin: '2px 0 0' }}>Secure cloud storage</p>
+                    </div>
+                  </div>
+                  {signedReceiptUrl && (
+                    selectedExpense.receipt_name?.endsWith('.pdf') ? (
+                      <div style={{ textAlign: 'center', padding: '16px' }}>
+                        <FileCheck size={24} style={{ color: 'var(--accent)', marginBottom: '8px' }} />
+                        <a
+                          href={signedReceiptUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: 'inline-block',
+                            padding: '8px 16px',
+                            borderRadius: '8px',
+                            backgroundColor: 'var(--accent)',
+                            color: 'var(--accent-fg)',
+                            fontSize: '12px',
+                            fontWeight: 700,
+                            textDecoration: 'none',
+                          }}
+                        >
+                          View Full PDF
+                        </a>
+                      </div>
+                    ) : (
+                      <img src={signedReceiptUrl} alt="Receipt" style={{ maxHeight: '200px', objectFit: 'contain', borderRadius: '8px', width: '100%' }} />
+                    )
+                  )}
+                </div>
+              ) : (
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '8px 0 0', fontStyle: 'italic' }}>
+                  No receipt attached to this transaction.
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Action bar */}
+          <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <button
+              onClick={() => openEdit(selectedExpense)}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                padding: '11px', borderRadius: '9px', border: '1px solid var(--border)',
+                backgroundColor: 'var(--bg-surface)', color: 'var(--text-primary)',
+                fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'background-color 0.1s ease',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-subtle)')}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--bg-surface)')}
+            >
+              <Edit3 size={15} /> Edit Entry
+            </button>
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                padding: '11px', borderRadius: '9px', border: '1px solid rgba(186,26,26,0.25)',
+                backgroundColor: 'var(--danger-light)', color: 'var(--danger)',
+                fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'background-color 0.1s ease',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(186,26,26,0.15)')}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--danger-light)')}
+            >
+              <Trash2 size={15} /> Delete
+            </button>
+          </div>
+        </DrawerOverlay>
+      )}
+
+      {/* ─── Create / Edit Drawer ─── */}
+      {(activeDrawer === 'create' || activeDrawer === 'edit') && (
+        <DrawerOverlay>
+          <div style={{ padding: '24px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+            <div>
+              <p style={sectionLabel}>{activeDrawer === 'edit' ? 'Edit Transaction' : 'Create Expense'}</p>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', margin: '4px 0 0' }}>
+                {activeDrawer === 'edit' ? 'Modify Ledger Entry' : 'Log Startup Expense'}
+              </h2>
+            </div>
+            <button onClick={() => setActiveDrawer(null)} style={{ padding: '8px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer', flexShrink: 0 }}>
+              <X size={16} />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} style={{ flex: 1, padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto' }}>
+            {/* Date */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={sectionLabel}>Date Occurred</label>
+              <DatePicker value={formDate} onChange={setFormDate} placeholder="Pick a date" />
+              {errors.date && <p style={{ fontSize: '11px', color: 'var(--danger)', margin: 0 }}>{errors.date}</p>}
+            </div>
+
+            {/* Amount */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={sectionLabel}>Amount (INR)</label>
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)', fontSize: '14px' }}>₹</span>
+                <input
+                  type="number" step="0.01" placeholder="0.00"
+                  value={formAmount} onChange={e => setFormAmount(e.target.value)}
+                  style={{ ...inputStyle, paddingLeft: '28px', fontFamily: 'var(--font-mono)', fontWeight: 600, borderColor: errors.amount ? 'var(--danger)' : 'var(--border)' }}
+                  onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+                  onBlur={e => (e.currentTarget.style.borderColor = errors.amount ? 'var(--danger)' : 'var(--border)')}
+                />
+              </div>
+              {errors.amount && <p style={{ fontSize: '11px', color: 'var(--danger)', margin: 0 }}>{errors.amount}</p>}
+            </div>
+
+            {/* Paid To */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={sectionLabel}>Paid To</label>
+              <input
+                type="text" placeholder="e.g. AWS, Swiggy, Uber"
+                value={formVendor} onChange={e => setFormVendor(e.target.value)}
+                style={{ ...inputStyle, borderColor: errors.vendor ? 'var(--danger)' : 'var(--border)' }}
+                onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+                onBlur={e => (e.currentTarget.style.borderColor = errors.vendor ? 'var(--danger)' : 'var(--border)')}
+              />
+              {errors.vendor && <p style={{ fontSize: '11px', color: 'var(--danger)', margin: 0 }}>{errors.vendor}</p>}
+            </div>
+
+            {/* Category */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={sectionLabel}>Category</label>
+              <CustomSelect options={CATEGORIES.map(c => ({ value: c, label: c }))} value={formCategory} onChange={setFormCategory} />
+            </div>
+
+            {/* Paid From */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={sectionLabel}>Paid From</label>
+              <CustomSelect options={PAYMENT_SOURCES} value={formPaidBy} onChange={setFormPaidBy} />
+            </div>
+
+            {/* Description */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={sectionLabel}>Description</label>
+              <textarea
+                rows={3} placeholder="What was this expense for?"
+                value={formDescription} onChange={e => setFormDescription(e.target.value)}
+                style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.5, borderColor: errors.description ? 'var(--danger)' : 'var(--border)' }}
+                onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+                onBlur={e => (e.currentTarget.style.borderColor = errors.description ? 'var(--danger)' : 'var(--border)')}
+              />
+              {errors.description && <p style={{ fontSize: '11px', color: 'var(--danger)', margin: 0 }}>{errors.description}</p>}
+            </div>
+
+            {/* Notes */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={sectionLabel}>Internal Notes (Optional)</label>
+              <textarea
+                rows={2} placeholder="Notes for other founders..."
+                value={formNotes} onChange={e => setFormNotes(e.target.value)}
+                style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.5 }}
+                onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+                onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
+              />
+            </div>
+
+            {/* Receipt */}
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <label style={sectionLabel}>Receipt Attachment</label>
+              {attachmentPath ? (
+                <div style={{ padding: '10px 14px', borderRadius: '8px', backgroundColor: 'rgba(254,185,4,0.06)', border: '1px solid rgba(254,185,4,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                    <span style={{ padding: '6px', backgroundColor: 'var(--accent)', borderRadius: '6px', color: 'var(--accent-fg)', flexShrink: 0 }}>
+                      {attachmentName?.endsWith('.pdf') ? <FileText size={14} /> : <ImageIcon size={14} />}
+                    </span>
+                    <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {attachmentName}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setAttachmentPath(null); setAttachmentName(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                    style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '11px', fontWeight: 600, flexShrink: 0, marginLeft: '8px' }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{ padding: '20px', border: '1px dashed var(--border)', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer', transition: 'background-color 0.15s ease' }}
+                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-subtle)')}
+                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                >
+                  <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*,application/pdf" style={{ display: 'none' }} />
+                  {isUploading
+                    ? <div style={{ width: '20px', height: '20px', border: '2px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} />
+                    : <UploadCloud size={22} style={{ color: 'var(--text-muted)' }} />}
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>
+                    {isUploading ? 'Uploading...' : 'Click to attach image or PDF'}
                   </p>
                 </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Category Segment</p>
-                  <p className="text-text-primary mt-1 font-semibold">{selectedExpense.category}</p>
-                </div>
-                <div className="col-span-2 border-t border-border pt-4">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Paid From</p>
-                  <p className="text-text-primary mt-1 font-semibold">{getSourceLabel(selectedExpense.paid_by)}</p>
-                </div>
-                <div className="col-span-2 border-t border-border pt-4">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Brief Description</p>
-                  <p className="text-text-primary mt-1.5 font-light leading-relaxed whitespace-pre-wrap">{selectedExpense.description}</p>
-                </div>
-                {selectedExpense.notes && (
-                  <div className="col-span-2 border-t border-border pt-4">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Internal Partnership Notes</p>
-                    <p className="text-text-primary mt-1.5 font-light leading-relaxed bg-[#feb904]/5 border border-[#feb904]/15 rounded-2xl p-3 text-xs italic">{selectedExpense.notes}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Receipt Attachment Panel */}
-              <div className="border-t border-border pt-6 space-y-3">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Invoice / Receipt Attachment</p>
-                {selectedExpense.receipt_path ? (
-                  <div className="p-4 rounded-2xl bg-bg-subtle border border-border space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-xl bg-accent/15 text-[#cda005] dark:text-[#feb904]">
-                        {selectedExpense.receipt_name?.endsWith('.pdf') ? <FileText size={20} /> : <ImageIcon size={20} />}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold text-text-primary truncate">{selectedExpense.receipt_name}</p>
-                        <p className="text-[10px] text-text-secondary mt-0.5 font-light">Supabase Secure Cloud Storage</p>
-                      </div>
-                    </div>
-
-                    {/* Receipt Preview */}
-                    {signedReceiptUrl && (
-                      <div className="relative border border-border/80 rounded-2xl overflow-hidden bg-bg-base flex items-center justify-center p-2 min-h-[140px] max-h-[220px]">
-                        {selectedExpense.receipt_name?.endsWith('.pdf') ? (
-                          <div className="text-center p-6 space-y-2">
-                            <FileCheck size={28} className="mx-auto text-[#feb904]" />
-                            <p className="text-xs text-text-secondary">PDF Document loaded</p>
-                            <a href={signedReceiptUrl} target="_blank" rel="noopener noreferrer" className="inline-block mt-2 px-3 py-1.5 rounded-lg bg-accent text-black font-bold text-[10px] hover-lift shadow-sm">
-                              View Full PDF
-                            </a>
-                          </div>
-                        ) : (
-                          <img src={signedReceiptUrl} alt="Receipt Thumbnail" className="max-h-[200px] object-contain rounded-lg shadow-sm" />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-xs text-text-secondary italic">No receipt attached to this transaction ledger.</p>
-                )}
-              </div>
+              )}
             </div>
 
-            {/* Action Bar */}
-            <div className="p-6 border-t border-border bg-bg-subtle/20 grid grid-cols-2 gap-4">
-              <button 
-                onClick={() => openEdit(selectedExpense)}
-                className="py-3 rounded-2xl border border-border bg-bg-surface text-text-primary font-bold hover:bg-bg-subtle transition-all cursor-pointer shadow-sm hover-lift flex items-center justify-center gap-2"
+            {/* Submit */}
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '14px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <button
+                type="button" onClick={() => setActiveDrawer(null)}
+                style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'transparent', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
               >
-                <Edit3 size={16} />
-                <span>Edit Entry</span>
+                Cancel
               </button>
-              
-              <button 
-                onClick={() => setShowDeleteConfirm(true)}
-                className="py-3 rounded-2xl bg-danger/10 hover:bg-danger/20 text-danger font-bold transition-all cursor-pointer shadow-sm hover-lift flex items-center justify-center gap-2"
+              <button
+                type="submit"
+                disabled={formSubmitLoading || isUploading}
+                style={{ padding: '9px 22px', borderRadius: '8px', border: 'none', backgroundColor: 'var(--accent)', color: 'var(--accent-fg)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: formSubmitLoading ? 0.7 : 1 }}
               >
-                <Trash2 size={16} />
-                <span>Delete Entry</span>
+                {formSubmitLoading ? 'Saving...' : activeDrawer === 'edit' ? 'Save Changes' : 'Add Expense'}
               </button>
             </div>
-          </div>
-        </div>
+          </form>
+        </DrawerOverlay>
       )}
 
-      {/* 5. CREATE & EDIT DRAWER SHEET FORM */}
-      {(activeDrawer === 'create' || activeDrawer === 'edit') && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs animate-fadeIn">
-          {/* Close click area */}
-          <div className="flex-1" onClick={() => setActiveDrawer(null)} />
-          
-          <div className="w-full max-w-[500px] h-full bg-bg-surface border-l border-border flex flex-col shadow-2xl animate-slideLeft transition-colors duration-300">
-            {/* Form Header */}
-            <div className="p-6 border-b border-border flex items-center justify-between bg-bg-subtle/30">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
-                  {activeDrawer === 'edit' ? 'Edit Transaction Ledger' : 'Create New Expense'}
-                </span>
-                <h2 className="text-xl font-bold text-text-primary mt-0.5">
-                  {activeDrawer === 'edit' ? 'Modify Ledger Entry' : 'Log Startup Expense'}
-                </h2>
-              </div>
-              <button 
-                onClick={() => setActiveDrawer(null)}
-                className="p-2 rounded-xl border border-border text-text-secondary hover:text-text-primary hover:bg-bg-subtle cursor-pointer transition-all"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Form Fields Body */}
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
-              {/* Date Input */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Date occurred</label>
-                <DatePicker
-                  value={formDate}
-                  onChange={setFormDate}
-                  placeholder="Pick a date"
-                  className={errors.date ? 'border-danger' : 'border-border'}
-                />
-                {errors.date && <p className="text-xs text-danger font-medium mt-1">{errors.date}</p>}
-              </div>
-
-              {/* Amount Input */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Transaction Amount (INR)</label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary font-bold font-tabular text-sm">₹</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    placeholder="0.00"
-                    value={formAmount}
-                    onChange={(e) => setFormAmount(e.target.value)}
-                    className={`w-full pl-8 pr-4 py-3 rounded-2xl border bg-bg-subtle/50 text-text-primary text-sm font-tabular font-bold focus:outline-none focus:border-accent focus:bg-bg-surface focus:ring-4 focus:ring-accent/15 transition-all ${
-                      errors.amount ? 'border-danger' : 'border-border'
-                    }`}
-                  />
-                </div>
-                {errors.amount && <p className="text-xs text-danger font-medium mt-1">{errors.amount}</p>}
-              </div>
-
-              {/* Paid To Input */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Paid To</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Paid to (e.g. AWS, Swiggy, Ola)"
-                  value={formVendor}
-                  onChange={(e) => setFormVendor(e.target.value)}
-                  className={`w-full p-3 rounded-2xl border bg-bg-subtle/50 text-text-primary text-sm focus:outline-none focus:border-accent focus:bg-bg-surface focus:ring-4 focus:ring-accent/15 transition-all ${
-                    errors.vendor ? 'border-danger' : 'border-border'
-                  }`}
-                />
-                {errors.vendor && <p className="text-xs text-danger font-medium mt-1">{errors.vendor}</p>}
-              </div>
-
-              {/* Category Dropdown */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Category Segment</label>
-                <CustomSelect
-                  options={CATEGORIES.map(cat => ({ value: cat, label: cat }))}
-                  value={formCategory}
-                  onChange={setFormCategory}
-                />
-              </div>
-
-              {/* Paid From Dropdown */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Paid From</label>
-                <CustomSelect
-                  options={PAYMENT_SOURCES}
-                  value={formPaidBy}
-                  onChange={setFormPaidBy}
-                />
-              </div>
-
-              {/* Description textarea */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Brief Description</label>
-                <textarea
-                  required
-                  rows={3}
-                  placeholder="Explain what this expense covers..."
-                  value={formDescription}
-                  onChange={(e) => setFormDescription(e.target.value)}
-                  className={`w-full p-3 rounded-2xl border bg-bg-subtle/50 text-text-primary text-sm focus:outline-none focus:border-accent focus:bg-bg-surface focus:ring-4 focus:ring-accent/15 transition-all ${
-                    errors.description ? 'border-danger' : 'border-border'
-                  }`}
-                />
-                {errors.description && <p className="text-xs text-danger font-medium mt-1">{errors.description}</p>}
-              </div>
-
-              {/* Internal notes textarea */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Internal Partner Notes (Optional)</label>
-                <textarea
-                  rows={2}
-                  placeholder="Add optional notes for the other founders..."
-                  value={formNotes}
-                  onChange={(e) => setFormNotes(e.target.value)}
-                  className={`w-full p-3 rounded-2xl border bg-bg-subtle/50 text-text-primary text-sm focus:outline-none focus:border-accent focus:bg-bg-surface focus:ring-4 focus:ring-accent/15 transition-all ${
-                    errors.notes ? 'border-danger' : 'border-border'
-                  }`}
-                />
-                {errors.notes && <p className="text-xs text-danger font-medium mt-1">{errors.notes}</p>}
-              </div>
-
-              {/* Storage Attachment Upload */}
-              <div className="space-y-2 border-t border-border pt-4">
-                <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Receipt / Invoice Attachment</label>
-                
-                {attachmentPath ? (
-                  /* File attached display */
-                  <div className="p-3 rounded-2xl bg-[#feb904]/5 border border-[#feb904]/15 flex items-center justify-between">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="p-2 rounded-xl bg-accent text-black shrink-0">
-                        {attachmentName?.endsWith('.pdf') ? <FileText size={18} /> : <ImageIcon size={18} />}
-                      </span>
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-text-primary truncate max-w-[200px]" title={attachmentName || ''}>
-                          {attachmentName}
-                        </p>
-                        <p className="text-[10px] text-text-secondary font-light">Successfully uploaded</p>
-                      </div>
-                    </div>
-                    
-                    <button
-                      type="button"
-                      onClick={removeAttachment}
-                      className="p-1.5 rounded-lg border border-border text-text-secondary hover:text-danger hover:bg-danger/10 cursor-pointer transition-colors"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                ) : (
-                  /* File upload action */
-                  <div 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-border rounded-2xl p-6 text-center hover:bg-bg-subtle/30 cursor-pointer transition-all hover:border-accent/80 flex flex-col items-center justify-center gap-2"
-                  >
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      accept="image/*,application/pdf"
-                      className="hidden"
-                    />
-                    
-                    {isUploading ? (
-                      <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <UploadCloud size={28} className="text-text-secondary" />
-                        <p className="text-xs font-bold text-text-primary">Click to select receipt file</p>
-                        <p className="text-[10px] text-text-secondary font-light leading-relaxed">
-                          Accepted JPG, PNG, or PDF formats up to 10 MB limit
-                        </p>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Submit footer actions */}
-              <div className="flex justify-end gap-3 pt-4 border-t border-border">
-                <button
-                  type="button"
-                  onClick={() => setActiveDrawer(null)}
-                  disabled={formSubmitLoading}
-                  className="px-5 py-3 rounded-2xl border border-border hover:bg-bg-subtle text-text-secondary hover:text-text-primary font-bold transition-all cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={formSubmitLoading || isUploading}
-                  className="px-6 py-3 rounded-2xl bg-accent text-accent-fg font-bold hover:bg-[#e0a403] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer shadow-md shadow-accent/15"
-                >
-                  {formSubmitLoading ? (
-                    <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <span>{activeDrawer === 'edit' ? 'Save Changes' : 'Confirm Ledger'}</span>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* 6. SINGLE DELETE CONFIRMATION MODAL */}
+      {/* ─── Delete Confirm Modal ─── */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-xs animate-fadeIn">
-          <div className="w-[90%] max-w-[400px] bg-bg-surface border border-border rounded-2xl p-6 shadow-2xl animate-scaleIn transition-colors duration-300">
-            <h3 className="text-lg font-bold text-text-primary flex items-center gap-2 text-danger">
-              <Trash2 size={20} />
-              <span>Confirm Delete</span>
-            </h3>
-            
-            <p className="text-sm text-text-secondary font-light mt-3 leading-relaxed">
-              Are you absolutely sure you want to permanently delete this expense ledger entry? This transaction will be archived in the audit logs, and any attached receipt will be erased.
+        <div
+          className="animate-fadeIn"
+          style={{ position: 'fixed', inset: 0, zIndex: 100, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
+        >
+          <div
+            className="animate-scaleIn"
+            style={{ width: '100%', maxWidth: '400px', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '28px', boxShadow: '0 24px 64px rgba(0,0,0,0.15)' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+              <Trash2 size={20} style={{ color: 'var(--danger)', flexShrink: 0 }} />
+              <h3 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--danger)', margin: 0 }}>Confirm Delete</h3>
+            </div>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6, fontWeight: 300 }}>
+              Are you sure you want to permanently delete this expense? This action is irreversible and will be recorded in the audit trail.
             </p>
-
-            <div className="flex justify-end gap-3 mt-6">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deleteLoading}
-                className="px-4 py-2.5 rounded-xl border border-border text-text-secondary hover:text-text-primary hover:bg-bg-subtle font-bold text-xs cursor-pointer transition-all"
+                style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'transparent', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
                 disabled={deleteLoading}
-                className="px-5 py-2.5 rounded-xl bg-danger text-danger-fg font-bold text-xs hover:bg-[#b53c2d] cursor-pointer shadow-md shadow-danger/10 transition-all"
+                style={{ padding: '9px 22px', borderRadius: '8px', border: 'none', backgroundColor: 'var(--danger)', color: 'var(--danger-fg)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: deleteLoading ? 0.7 : 1 }}
               >
-                {deleteLoading ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <span>Delete Entry</span>
-                )}
+                {deleteLoading ? 'Deleting...' : 'Delete Entry'}
               </button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }

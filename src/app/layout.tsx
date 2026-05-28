@@ -7,6 +7,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-sans",
   weight: ["300", "400", "500", "600", "700", "800"],
   display: "swap",
+  preload: false,
 });
 
 const sora = Sora({
@@ -14,12 +15,14 @@ const sora = Sora({
   variable: "--font-display",
   weight: ["300", "400", "500", "600", "700", "800"],
   display: "swap",
+  preload: false,
 });
 
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {

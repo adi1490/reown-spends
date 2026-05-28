@@ -5,23 +5,22 @@ import { signJWT } from '@/lib/auth-jwt';
 
 export async function POST(request: Request) {
   try {
-    const { email, password, rememberMe } = await request.json();
+    const { username, password, rememberMe } = await request.json();
 
-    if (!email || !password) {
+    if (!username || !password) {
       return NextResponse.json(
-        { error: 'Email and password are required.' },
+        { error: 'Username and password are required.' },
         { status: 400 }
       );
     }
 
-    // 1. Get database client
     const supabase = getSupabaseAdmin();
 
-    // 2. Fetch user from db
+    // Look up user by username (case-insensitive)
     const { data: user, error } = await supabase
       .from('users')
       .select('*')
-      .eq('email', email.toLowerCase().trim())
+      .eq('username', username.toLowerCase().trim())
       .maybeSingle();
 
     if (error) {
@@ -34,39 +33,36 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'Invalid email or password.' },
+        { error: 'Invalid username or password.' },
         { status: 401 }
       );
     }
 
-    // 3. Verify password using bcryptjs
+    // Verify password
     const isPasswordValid = bcrypt.compareSync(password, user.password_hash);
     if (!isPasswordValid) {
       return NextResponse.json(
-        { error: 'Invalid email or password.' },
+        { error: 'Invalid username or password.' },
         { status: 401 }
       );
     }
 
-    // 4. Calculate expiration days
-    const expirationDays = rememberMe ? 7 : 1; // 7 days if remember me, 1 day otherwise
+    const expirationDays = rememberMe ? 7 : 1;
 
-    // 5. Generate secure JWT
     const token = await signJWT({
       userId: user.id,
-      email: user.email,
+      username: user.username,
       name: user.name,
-      rememberMe: !!rememberMe
+      rememberMe: !!rememberMe,
     }, expirationDays);
 
-    // 6. Construct response with HTTP-only cookie
     const response = NextResponse.json({
       success: true,
       user: {
         id: user.id,
         name: user.name,
-        email: user.email
-      }
+        username: user.username,
+      },
     });
 
     response.cookies.set('reown_spends_session', token, {
@@ -74,7 +70,7 @@ export async function POST(request: Request) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: rememberMe ? 7 * 24 * 60 * 60 : undefined
+      maxAge: rememberMe ? 7 * 24 * 60 * 60 : undefined,
     });
 
     return response;

@@ -19,7 +19,6 @@ export function DatePicker({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Parse YYYY-MM-DD to Date
   const parseDate = (str: string): Date => {
     if (!str) return new Date();
     const [y, m, d] = str.split('-').map(Number);
@@ -29,7 +28,6 @@ export function DatePicker({
   const selectedDate = value ? parseDate(value) : null;
   const [currentMonth, setCurrentMonth] = useState<Date>(selectedDate || new Date());
 
-  // Close calendar popover on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -40,7 +38,7 @@ export function DatePicker({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Format date for display in trigger: "dd/mm/yyyy"
+  // Display dd/mm/yyyy
   const formatDateDisplay = (date: Date | null): string => {
     if (!date) return '';
     const d = String(date.getDate()).padStart(2, '0');
@@ -49,55 +47,56 @@ export function DatePicker({
     return `${d}/${m}/${y}`;
   };
 
-  // Navigate months
-  const handlePrevMonth = () => {
+  const handlePrevMonth = () =>
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
-  };
 
-  const handleNextMonth = () => {
+  const handleNextMonth = () =>
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
-  };
 
-  // Generate days in month
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
 
-  const firstDayIndex = new Date(year, month, 1).getDay(); // Weekday of 1st day (0-6)
-  const totalDays = new Date(year, month + 1, 0).getDate(); // Total days in this month
+  const firstDayIndex = new Date(year, month, 1).getDay();
+  const totalDays = new Date(year, month + 1, 0).getDate();
   const prevMonthTotalDays = new Date(year, month, 0).getDate();
 
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'July', 'August', 'September', 'October', 'November', 'December',
   ];
 
   const daysOfWeek = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
-  // Days array to render
   const days: Array<{ day: number; isCurrentMonth: boolean; dateString: string }> = [];
 
-  // Previous month padding days
   for (let i = firstDayIndex - 1; i >= 0; i--) {
     const d = prevMonthTotalDays - i;
     const prevMonth = month === 0 ? 11 : month - 1;
     const prevYear = month === 0 ? year - 1 : year;
-    const dateString = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    days.push({ day: d, isCurrentMonth: false, dateString });
+    days.push({
+      day: d,
+      isCurrentMonth: false,
+      dateString: `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+    });
   }
 
-  // Current month days
   for (let d = 1; d <= totalDays; d++) {
-    const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    days.push({ day: d, isCurrentMonth: true, dateString });
+    days.push({
+      day: d,
+      isCurrentMonth: true,
+      dateString: `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+    });
   }
 
-  // Next month padding days to complete grid
-  const remainingCells = 42 - days.length; // standard 6-row grid
+  const remainingCells = 42 - days.length;
   for (let d = 1; d <= remainingCells; d++) {
     const nextMonth = month === 11 ? 0 : month + 1;
     const nextYear = month === 11 ? year + 1 : year;
-    const dateString = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    days.push({ day: d, isCurrentMonth: false, dateString });
+    days.push({
+      day: d,
+      isCurrentMonth: false,
+      dateString: `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+    });
   }
 
   const handleSelectDay = (dateString: string) => {
@@ -105,71 +104,172 @@ export function DatePicker({
     setIsOpen(false);
   };
 
+  const todayString = new Date().toISOString().substring(0, 10);
+
   return (
     <div className="relative w-full" ref={containerRef}>
+      {/* Trigger button — clicking anywhere opens picker */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center gap-3 p-3 rounded-2xl border border-border bg-bg-subtle/50 text-text-primary text-xs font-semibold focus:outline-none focus:border-accent focus:bg-bg-surface focus:ring-4 focus:ring-accent/15 transition-all text-left cursor-pointer ${className}`}
+        className={`w-full flex items-center gap-2.5 text-left cursor-pointer ${className}`}
+        style={{
+          padding: '9px 13px',
+          borderRadius: '8px',
+          border: '1px solid var(--border)',
+          backgroundColor: 'var(--bg-surface)',
+          color: selectedDate ? 'var(--text-primary)' : 'var(--text-muted)',
+          fontSize: '13px',
+          fontFamily: selectedDate ? 'var(--font-mono)' : 'var(--font-sans)',
+          fontWeight: selectedDate ? 500 : 300,
+          outline: 'none',
+          transition: 'border-color 0.15s ease',
+        }}
+        onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+        onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
       >
-        <CalendarIcon size={16} className="text-text-secondary shrink-0" />
-        <span className="flex-1 truncate">
-          {selectedDate ? formatDateDisplay(selectedDate) : <span className="text-text-muted font-light">{placeholder}</span>}
+        <CalendarIcon size={14} style={{ flexShrink: 0, color: 'var(--text-muted)' }} />
+        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {selectedDate ? formatDateDisplay(selectedDate) : placeholder}
         </span>
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 mt-2 p-4 rounded-2xl border border-border bg-bg-surface shadow-2xl z-[9999] w-[280px] animate-scaleIn select-none backdrop-blur-md">
-          {/* Calendar Header */}
-          <div className="flex items-center justify-between mb-4">
+        <div
+          className="animate-scaleIn"
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 'calc(100% + 6px)',
+            zIndex: 9999,
+            width: '272px',
+            padding: '16px',
+            borderRadius: '12px',
+            border: '1px solid var(--border)',
+            backgroundColor: 'var(--bg-surface)',
+            boxShadow: '0 12px 40px rgba(0,0,0,0.10)',
+            userSelect: 'none',
+          }}
+        >
+          {/* Month header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
             <button
               type="button"
               onClick={handlePrevMonth}
-              className="p-1.5 rounded-lg border border-border hover:bg-bg-subtle text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+              style={{
+                padding: '6px',
+                borderRadius: '7px',
+                border: '1px solid var(--border)',
+                backgroundColor: 'transparent',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                transition: 'background-color 0.1s ease',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-subtle)')}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft size={14} />
             </button>
-            <h4 className="text-xs font-bold text-text-primary">
+
+            <span
+              style={{
+                fontSize: '13px',
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-display)',
+              }}
+            >
               {monthNames[month]} {year}
-            </h4>
+            </span>
+
             <button
               type="button"
               onClick={handleNextMonth}
-              className="p-1.5 rounded-lg border border-border hover:bg-bg-subtle text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+              style={{
+                padding: '6px',
+                borderRadius: '7px',
+                border: '1px solid var(--border)',
+                backgroundColor: 'transparent',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                transition: 'background-color 0.1s ease',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-subtle)')}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
-              <ChevronRight size={16} />
+              <ChevronRight size={14} />
             </button>
           </div>
 
-          {/* Weekdays */}
-          <div className="grid grid-cols-7 gap-1 text-center mb-1">
+          {/* Weekday headers */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', marginBottom: '4px' }}>
             {daysOfWeek.map((day) => (
-              <span key={day} className="text-[10px] font-bold text-text-muted py-1">
+              <span
+                key={day}
+                style={{
+                  textAlign: 'center',
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  color: 'var(--text-muted)',
+                  padding: '4px 0',
+                  letterSpacing: '0.04em',
+                }}
+              >
                 {day}
               </span>
             ))}
           </div>
 
-          {/* Days Grid */}
-          <div className="grid grid-cols-7 gap-1">
+          {/* Day grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
             {days.map((item, index) => {
               const isSelected = value === item.dateString;
-              const isToday = new Date().toISOString().substring(0, 10) === item.dateString;
+              const isToday = todayString === item.dateString;
 
               return (
                 <button
                   key={`${item.dateString}-${index}`}
                   type="button"
                   onClick={() => handleSelectDay(item.dateString)}
-                  className={`h-8 w-8 rounded-lg text-[11px] flex items-center justify-center transition-all cursor-pointer ${
-                    !item.isCurrentMonth
-                      ? 'text-text-muted opacity-40 hover:bg-bg-subtle'
-                      : isSelected
-                      ? 'bg-accent text-accent-fg font-extrabold shadow-sm'
+                  style={{
+                    height: '32px',
+                    width: '100%',
+                    borderRadius: '6px',
+                    fontSize: '11px',
+                    fontFamily: 'var(--font-mono)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    border: isToday && !isSelected ? '1px solid var(--accent)' : '1px solid transparent',
+                    backgroundColor: isSelected
+                      ? 'var(--accent)'
                       : isToday
-                      ? 'bg-bg-subtle text-accent border border-accent/30 font-bold'
-                      : 'text-text-primary font-light hover:bg-bg-subtle'
-                  }`}
+                      ? 'var(--bg-subtle)'
+                      : 'transparent',
+                    color: isSelected
+                      ? 'var(--accent-fg)'
+                      : !item.isCurrentMonth
+                      ? 'var(--text-muted)'
+                      : isToday
+                      ? 'var(--accent)'
+                      : 'var(--text-primary)',
+                    fontWeight: isSelected ? 700 : isToday ? 600 : item.isCurrentMonth ? 400 : 300,
+                    opacity: !item.isCurrentMonth ? 0.4 : 1,
+                    transition: 'background-color 0.1s ease',
+                  }}
+                  onMouseEnter={e => {
+                    if (!isSelected) e.currentTarget.style.backgroundColor = 'var(--bg-container)';
+                  }}
+                  onMouseLeave={e => {
+                    if (!isSelected) {
+                      e.currentTarget.style.backgroundColor = isToday ? 'var(--bg-subtle)' : 'transparent';
+                    }
+                  }}
                 >
                   {item.day}
                 </button>

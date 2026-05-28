@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Eye, EyeOff, Lock, Mail, ShieldAlert, Sparkles, Sun, Moon } from 'lucide-react';
+import { Eye, EyeOff, Lock, User, ShieldAlert, LogIn, Sun, Moon } from 'lucide-react';
 
 function LoginFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
 
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -17,186 +17,225 @@ function LoginFormContent() {
   const [error, setError] = useState('');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
-  // Handle initial theme detection
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     const activeTheme = (savedTheme as 'light' | 'dark') || systemTheme;
-    
     setTheme(activeTheme);
-    if (activeTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    if (activeTheme === 'dark') document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
   }, []);
 
-  // Toggle dark/light theme
   const toggleTheme = () => {
-    const nextTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(nextTheme);
-    localStorage.setItem('theme', nextTheme);
-    if (nextTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    const next = theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+    localStorage.setItem('theme', next);
+    if (next === 'dark') document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, rememberMe }),
+        body: JSON.stringify({ username: username.toLowerCase().trim(), password, rememberMe }),
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Invalid credentials.');
-      }
-
-      // Successful login
+      if (!res.ok) throw new Error(data.error || 'Login failed.');
       router.push(callbackUrl);
       router.refresh();
     } catch (err: any) {
-      setError(err.message || 'An error occurred during login. Please try again.');
+      setError(err.message || 'Login failed. Please try again.');
       setIsLoading(false);
     }
   };
 
-  return (
-    <main className="min-h-screen w-full flex items-center justify-center bg-bg-base p-4 relative overflow-hidden transition-colors duration-300">
-      {/* Decorative ambient background glows */}
-      <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-accent/5 dark:bg-accent/3 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-accent/5 dark:bg-accent/3 blur-[120px] pointer-events-none" />
+  const inputBase: React.CSSProperties = {
+    width: '100%',
+    padding: '11px 14px',
+    borderRadius: '8px',
+    border: '1px solid var(--border)',
+    backgroundColor: 'var(--bg-base)',
+    color: 'var(--text-primary)',
+    fontSize: '14px',
+    outline: 'none',
+    fontFamily: 'var(--font-sans)',
+    transition: 'border-color 0.15s ease',
+  };
 
-      {/* Theme Toggle Button */}
+  return (
+    <main
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'var(--bg-base)',
+        padding: '24px',
+        position: 'relative',
+      }}
+    >
+      {/* Theme toggle */}
       <button
         onClick={toggleTheme}
-        className="absolute top-6 right-6 p-3 rounded-xl border border-border bg-bg-surface text-text-secondary hover:text-text-primary hover:bg-bg-subtle transition-all duration-200 cursor-pointer shadow-sm hover-lift"
-        aria-label="Toggle theme"
+        style={{
+          position: 'absolute', top: '24px', right: '24px',
+          padding: '10px', borderRadius: '10px',
+          border: '1px solid var(--border)',
+          backgroundColor: 'var(--bg-surface)',
+          color: 'var(--text-secondary)',
+          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'background-color 0.15s ease',
+        }}
+        onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-subtle)')}
+        onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--bg-surface)')}
       >
-        {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+        {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
       </button>
 
-      <div className="w-full max-w-[440px] z-10">
-        {/* Brand Logo & Tagline */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-accent mb-4 text-accent-fg shadow-md">
-            <span className="font-display font-bold text-2xl tracking-tighter">re</span>
+      <div style={{ width: '100%', maxWidth: '420px', zIndex: 10 }}>
+        {/* Brand */}
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            width: '56px', height: '56px', borderRadius: '14px',
+            backgroundColor: 'var(--accent)', marginBottom: '20px',
+          }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '22px', color: 'var(--accent-fg)', letterSpacing: '-0.04em' }}>
+              re
+            </span>
           </div>
-          <h1 className="font-display text-3xl font-extrabold tracking-tight text-text-primary">
-            re<span className="font-normal opacity-90">OWN</span> <span className="text-[#feb904] dark:text-[#feb904] font-semibold">Spends</span>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--text-primary)', margin: '0 0 8px' }}>
+            reOWN <span style={{ color: 'var(--accent)', fontWeight: 600 }}>Spends</span>
           </h1>
-          <p className="text-sm text-text-secondary mt-2 font-light">
-            Private Financial Wealth & Expense Tracker
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, fontWeight: 300, lineHeight: 1.5 }}>
+            Private Expense & Financial Intelligence Platform
           </p>
         </div>
 
-        {/* Login Card */}
-        <div className="bg-bg-surface border border-border rounded-2xl p-8 shadow-xl transition-all duration-300 relative overflow-hidden">
+        {/* Login card */}
+        <div style={{
+          backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)',
+          borderRadius: '16px', padding: '32px',
+        }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 24px', letterSpacing: '-0.02em' }}>
+            Founder Sign In
+          </h2>
+
           {error && (
-            <div className="mb-6 flex items-start gap-3 p-4 rounded-2xl bg-danger/10 border border-danger/20 text-danger text-sm font-medium animate-shake">
-              <ShieldAlert size={18} className="shrink-0 mt-0.5" />
+            <div
+              className="animate-slideDown"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                padding: '12px 14px', borderRadius: '8px',
+                backgroundColor: 'var(--danger-light)',
+                border: '1px solid rgba(186,26,26,0.25)',
+                color: 'var(--danger)', fontSize: '13px', fontWeight: 500,
+                marginBottom: '20px',
+              }}
+            >
+              <ShieldAlert size={16} style={{ flexShrink: 0 }} />
               <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-5">
-            {/* Email Field */}
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
-                Email Address
+          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Username */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label htmlFor="username" style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                Username
               </label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">
-                  <Mail size={18} />
-                </span>
+              <div style={{ position: 'relative' }}>
+                <User size={15} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
                 <input
-                  id="email"
-                  type="email"
+                  id="username"
+                  type="text"
                   required
-                  placeholder="name@reown.sale"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="username"
+                  placeholder="e.g. vishnu"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
                   disabled={isLoading}
-                  className="w-full pl-12 pr-4 py-3 rounded-2xl border border-border bg-bg-subtle/50 text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-accent focus:bg-bg-surface focus:ring-4 focus:ring-accent/15 transition-all disabled:opacity-50"
+                  style={{ ...inputBase, paddingLeft: '38px', fontFamily: 'var(--font-mono)' }}
+                  onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+                  onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
                 />
               </div>
             </div>
 
-            {/* Password Field */}
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
+            {/* Password */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label htmlFor="password" style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
                 Password
               </label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">
-                  <Lock size={18} />
-                </span>
+              <div style={{ position: 'relative' }}>
+                <Lock size={15} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   required
+                  autoComplete="current-password"
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={e => setPassword(e.target.value)}
                   disabled={isLoading}
-                  className="w-full pl-12 pr-12 py-3 rounded-2xl border border-border bg-bg-subtle/50 text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-accent focus:bg-bg-surface focus:ring-4 focus:ring-accent/15 transition-all disabled:opacity-50"
+                  style={{ ...inputBase, paddingLeft: '38px', paddingRight: '44px' }}
+                  onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+                  onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  disabled={isLoading}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary focus:outline-none cursor-pointer"
+                  style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px', display: 'flex' }}
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
 
-            {/* Remember Me */}
-            <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-3 cursor-pointer text-sm text-text-secondary select-none">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  disabled={isLoading}
-                  className="w-4 h-4 rounded border-border text-accent bg-bg-subtle focus:ring-accent cursor-pointer accent-accent"
-                />
-                <span>Remember me for 7 days</span>
-              </label>
-            </div>
+            {/* Remember me */}
+            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', color: 'var(--text-secondary)', userSelect: 'none' }}>
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={e => setRememberMe(e.target.checked)}
+                disabled={isLoading}
+                style={{ width: '15px', height: '15px', accentColor: 'var(--accent)', cursor: 'pointer' }}
+              />
+              <span>Keep me signed in for 7 days</span>
+            </label>
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-2 py-3.5 px-4 rounded-2xl font-bold bg-[#feb904] text-black hover:bg-[#e0a403] focus:ring-4 focus:ring-accent/30 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer shadow-md shadow-accent/20 flex items-center justify-center gap-2"
+              style={{
+                width: '100%', padding: '12px', borderRadius: '8px', border: 'none',
+                backgroundColor: 'var(--accent)', color: 'var(--accent-fg)',
+                fontSize: '14px', fontWeight: 700,
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                opacity: isLoading ? 0.7 : 1,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                transition: 'background-color 0.15s ease',
+                boxShadow: '0 4px 16px rgba(254,185,4,0.25)',
+              }}
+              onMouseEnter={e => { if (!isLoading) e.currentTarget.style.backgroundColor = 'var(--accent-dim)'; }}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--accent)')}
             >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <Sparkles size={18} />
-                  <span>Access Platform</span>
-                </>
-              )}
+              {isLoading
+                ? <div style={{ width: '18px', height: '18px', border: '2px solid var(--accent-fg)', borderTopColor: 'transparent', borderRadius: '50%' }} />
+                : <><LogIn size={17} /><span>Sign In</span></>}
             </button>
           </form>
         </div>
 
-        {/* Secure Footer Notice */}
-        <p className="text-center text-xs text-text-muted mt-8 font-light leading-relaxed">
-          Authorized personnel only. Activities logged under company audit protocol.<br />
-          REOWN INFOCOM LLP © 2026. All rights reserved.
+        <p style={{ textAlign: 'center', fontSize: '11px', color: 'var(--text-muted)', margin: '24px 0 0', lineHeight: 1.6, fontWeight: 300 }}>
+          Authorized personnel only. Activities are logged under company audit protocol.<br />
+          REOWN INFOCOM LLP © {new Date().getFullYear()}. All rights reserved.
         </p>
       </div>
     </main>
@@ -206,8 +245,8 @@ function LoginFormContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <main className="min-h-screen w-full flex items-center justify-center bg-bg-base p-4">
-        <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+      <main style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-base)' }}>
+        <div style={{ width: '36px', height: '36px', border: '2px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} />
       </main>
     }>
       <LoginFormContent />

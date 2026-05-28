@@ -3,22 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import { CustomSelect } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
-import { 
-  History, 
-  User, 
-  Calendar, 
+import {
+  History,
   SlidersHorizontal,
-  ChevronDown,
-  ChevronUp,
   PlusCircle,
   Edit2,
   MinusCircle,
   Clock,
   ChevronLeft,
   ChevronRight,
-  Eye,
-  X,
-  FileJson
+  ChevronDown,
+  ChevronUp,
+  FileJson,
 } from 'lucide-react';
 
 interface AuditLog {
@@ -30,13 +26,28 @@ interface AuditLog {
   snapshot: any;
   timestamp: string;
   actor_name: string;
-  actor_email: string;
+  actor_username: string;
 }
 
 interface Actor {
   id: string;
   name: string;
 }
+
+const card: React.CSSProperties = {
+  backgroundColor: 'var(--bg-surface)',
+  border: '1px solid var(--border)',
+  borderRadius: '12px',
+};
+
+const sectionLabel: React.CSSProperties = {
+  fontSize: '10px',
+  fontWeight: 700,
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase',
+  color: 'var(--text-muted)',
+  margin: 0,
+};
 
 export default function ActivityLogPage() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
@@ -46,13 +57,11 @@ export default function ActivityLogPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Filters state
   const [selectedActor, setSelectedActor] = useState('');
   const [selectedAction, setSelectedAction] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
-  // UI state
   const [showFilters, setShowFilters] = useState(false);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
 
@@ -65,9 +74,8 @@ export default function ActivityLogPage() {
         actor: selectedActor,
         action: selectedAction,
         startDate,
-        endDate
+        endDate,
       });
-
       const res = await fetch(`/api/activity?${params.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch activity logs.');
       const data = await res.json();
@@ -82,297 +90,363 @@ export default function ActivityLogPage() {
     }
   };
 
-  useEffect(() => {
-    fetchLogs();
-  }, [page, selectedActor, selectedAction, startDate, endDate]);
+  useEffect(() => { fetchLogs(); }, [page, selectedActor, selectedAction, startDate, endDate]);
 
-  const toggleExpand = (logId: string) => {
-    setExpandedLogId(prev => prev === logId ? null : logId);
+  const toggleExpand = (logId: string) =>
+    setExpandedLogId(prev => (prev === logId ? null : logId));
+
+  const ACTION_CONFIG = {
+    CREATED: { bg: 'rgba(46,125,50,0.08)', border: 'rgba(46,125,50,0.2)', color: '#2e7d32', Icon: PlusCircle, label: 'Created' },
+    UPDATED: { bg: 'rgba(254,185,4,0.10)', border: 'rgba(254,185,4,0.25)', color: '#b8870a', Icon: Edit2, label: 'Updated' },
+    DELETED: { bg: 'rgba(186,26,26,0.08)', border: 'rgba(186,26,26,0.2)', color: 'var(--danger)', Icon: MinusCircle, label: 'Deleted' },
   };
 
-  const getActionBadge = (action: 'CREATED' | 'UPDATED' | 'DELETED') => {
-    switch (action) {
-      case 'CREATED':
-        return (
-          <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wider uppercase bg-[#2e7d32]/10 border border-[#2e7d32]/20 text-[#2e7d32] flex items-center gap-1">
-            <PlusCircle size={10} />
-            <span>Created</span>
-          </span>
-        );
-      case 'UPDATED':
-        return (
-          <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wider uppercase bg-[#feb904]/10 border border-[#feb904]/20 text-[#cda005] dark:text-[#feb904] flex items-center gap-1">
-            <Edit2 size={10} />
-            <span>Updated</span>
-          </span>
-        );
-      case 'DELETED':
-        return (
-          <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wider uppercase bg-danger/10 border border-danger/20 text-danger flex items-center gap-1">
-            <MinusCircle size={10} />
-            <span>Deleted</span>
-          </span>
-        );
-    }
+  const getActionBadge = (action: keyof typeof ACTION_CONFIG) => {
+    const cfg = ACTION_CONFIG[action];
+    return (
+      <span style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        padding: '3px 10px',
+        borderRadius: '100px',
+        fontSize: '10px',
+        fontWeight: 700,
+        letterSpacing: '0.04em',
+        textTransform: 'uppercase',
+        backgroundColor: cfg.bg,
+        border: `1px solid ${cfg.border}`,
+        color: cfg.color,
+        flexShrink: 0,
+      }}>
+        <cfg.Icon size={10} />
+        {cfg.label}
+      </span>
+    );
   };
 
   const renderSummaryText = (log: AuditLog) => {
     const snap = log.snapshot;
-    
     if (log.action === 'CREATED') {
       return (
-        <span className="text-text-primary">
-          Added <span className="font-bold font-tabular">₹{snap.amount?.toLocaleString('en-IN')}</span> for{' '}
-          <span className="font-semibold">{snap.vendor}</span> under <span className="underline decoration-accent/40 decoration-2">{snap.category}</span>
+        <span style={{ color: 'var(--text-primary)', fontSize: '13px' }}>
+          Added{' '}
+          <strong style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
+            ₹{snap.amount?.toLocaleString('en-IN')}
+          </strong>
+          {' '}for{' '}
+          <strong style={{ fontWeight: 600 }}>{snap.vendor}</strong>
+          {' '}under{' '}
+          <span style={{ textDecoration: 'underline', textDecorationColor: 'rgba(254,185,4,0.5)' }}>{snap.category}</span>
         </span>
       );
     } else if (log.action === 'DELETED') {
       return (
-        <span className="text-text-primary">
-          Deleted record <span className="font-bold">{snap.vendor}</span> which cost{' '}
-          <span className="font-bold font-tabular">₹{snap.amount?.toLocaleString('en-IN')}</span>
+        <span style={{ color: 'var(--text-primary)', fontSize: '13px' }}>
+          Deleted record{' '}
+          <strong style={{ fontWeight: 600 }}>{snap.vendor}</strong>
+          {' '}which cost{' '}
+          <strong style={{ fontFamily: 'var(--font-mono)' }}>₹{snap.amount?.toLocaleString('en-IN')}</strong>
         </span>
       );
     } else if (log.action === 'UPDATED') {
       const before = snap.before || {};
       const after = snap.after || {};
-      
       const changes: string[] = [];
-      if (before.amount !== after.amount) {
-        changes.push(`amount (₹${before.amount} → ₹${after.amount})`);
-      }
-      if (before.vendor !== after.vendor) {
-        changes.push(`vendor (${before.vendor} → ${after.vendor})`);
-      }
-      if (before.category !== after.category) {
-        changes.push(`category (${before.category} → ${after.category})`);
-      }
-
-      const summaryStr = changes.length > 0 ? `Changed ${changes.join(', ')}` : `Modified details for ${after.vendor}`;
-
+      if (before.amount !== after.amount) changes.push(`amount (₹${before.amount} → ₹${after.amount})`);
+      if (before.vendor !== after.vendor) changes.push(`vendor (${before.vendor} → ${after.vendor})`);
+      if (before.category !== after.category) changes.push(`category (${before.category} → ${after.category})`);
+      const summaryStr = changes.length > 0 ? `Changed ${changes.join(', ')}` : `Modified details`;
       return (
-        <span className="text-text-primary">
-          Updated entry for <span className="font-semibold">{after.vendor}</span>. <span className="text-text-secondary text-xs italic">{summaryStr}</span>
+        <span style={{ color: 'var(--text-primary)', fontSize: '13px' }}>
+          Updated entry for{' '}
+          <strong style={{ fontWeight: 600 }}>{after.vendor}</strong>.{' '}
+          <span style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '12px' }}>{summaryStr}</span>
         </span>
       );
     }
-
-    return <span className="text-text-secondary">Modified expense entry</span>;
+    return <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Modified expense entry</span>;
   };
 
+  const hasActiveFilters = selectedActor || selectedAction || startDate || endDate;
+
   return (
-    <div className="space-y-6 animate-fadeIn">
-      {/* 1. Header */}
+    <div className="animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {/* Header */}
       <div>
-        <h1 className="font-display text-3xl font-extrabold tracking-tight text-text-primary">
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)', margin: 0 }}>
           Audit Trail
         </h1>
-        <p className="text-sm text-text-secondary mt-1 font-light">
-          A fully transparent, chronological transaction log of all operations performed by the founders.
+        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '4px 0 0', fontWeight: 300 }}>
+          Chronological log of all platform operations performed by the founders.
         </p>
       </div>
 
-      {/* 2. Filter Toolbar */}
-      <div className="bg-bg-surface border border-border rounded-2xl p-4 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-sm text-text-secondary">
-            <Clock size={16} className="text-accent" />
-            <span>Total Logged Operations:{' '}</span>
-            <span className="font-bold text-text-primary font-tabular bg-bg-subtle border border-border px-2.5 py-0.5 rounded-lg text-xs">
+      {/* Filter toolbar */}
+      <div style={{ ...card, padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--text-secondary)' }}>
+            <Clock size={15} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+            <span>Total Operations:</span>
+            <span style={{
+              fontFamily: 'var(--font-mono)',
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+              backgroundColor: 'var(--bg-container)',
+              border: '1px solid var(--border)',
+              borderRadius: '6px',
+              padding: '2px 8px',
+              fontSize: '12px',
+            }}>
               {totalCount}
             </span>
           </div>
 
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`px-4 py-2.5 rounded-xl border text-sm font-semibold flex items-center gap-2 transition-all cursor-pointer ${
-              showFilters || selectedActor || selectedAction || startDate || endDate
-                ? 'bg-accent/10 border-accent text-[#cda005] dark:text-[#feb904]'
-                : 'border-border text-text-secondary hover:text-text-primary hover:bg-bg-subtle'
-            }`}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '9px 14px',
+              borderRadius: '8px',
+              border: '1px solid',
+              fontSize: '13px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              borderColor: (showFilters || hasActiveFilters) ? 'var(--accent)' : 'var(--border)',
+              backgroundColor: (showFilters || hasActiveFilters) ? 'rgba(254,185,4,0.08)' : 'transparent',
+              color: (showFilters || hasActiveFilters) ? 'var(--text-primary)' : 'var(--text-secondary)',
+            }}
           >
-            <SlidersHorizontal size={16} />
+            <SlidersHorizontal size={14} />
             <span>Filter Feed</span>
           </button>
         </div>
 
-        {/* Filters Body */}
         {showFilters && (
-          <div className="border-t border-border pt-4 grid grid-cols-1 sm:grid-cols-4 gap-4 animate-slideDown">
-            {/* Filter by Actor */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Performed By</label>
+          <div
+            className="animate-slideDown"
+            style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <p style={sectionLabel}>Performed By</p>
               <CustomSelect
                 options={[
                   { value: '', label: 'All Founders' },
-                  ...actors.map(act => ({ value: act.id, label: act.name }))
+                  ...actors.map(a => ({ value: a.id, label: a.name })),
                 ]}
                 value={selectedActor}
-                onChange={(val) => { setSelectedActor(val); setPage(1); }}
+                onChange={val => { setSelectedActor(val); setPage(1); }}
               />
             </div>
 
-            {/* Filter by Action */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Action Type</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <p style={sectionLabel}>Action Type</p>
               <CustomSelect
                 options={[
                   { value: '', label: 'All Actions' },
                   { value: 'CREATED', label: 'CREATED' },
                   { value: 'UPDATED', label: 'UPDATED' },
-                  { value: 'DELETED', label: 'DELETED' }
+                  { value: 'DELETED', label: 'DELETED' },
                 ]}
                 value={selectedAction}
-                onChange={(val) => { setSelectedAction(val); setPage(1); }}
+                onChange={val => { setSelectedAction(val); setPage(1); }}
               />
             </div>
 
-            {/* Start Date */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Logged From</label>
-              <DatePicker
-                value={startDate}
-                onChange={(val) => { setStartDate(val); setPage(1); }}
-                placeholder="Logged From"
-              />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <p style={sectionLabel}>Logged From</p>
+              <DatePicker value={startDate} onChange={val => { setStartDate(val); setPage(1); }} placeholder="Start date" />
             </div>
 
-            {/* End Date */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Logged To</label>
-              <DatePicker
-                value={endDate}
-                onChange={(val) => { setEndDate(val); setPage(1); }}
-                placeholder="Logged To"
-              />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <p style={sectionLabel}>Logged To</p>
+              <DatePicker value={endDate} onChange={val => { setEndDate(val); setPage(1); }} placeholder="End date" />
             </div>
           </div>
         )}
       </div>
 
-      {/* 3. Chronological Feed */}
-      <div className="space-y-4">
+      {/* Logs feed */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {isLoading ? (
-          /* Skeletons */
-          <div className="space-y-3">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-16 w-full bg-bg-surface border border-border rounded-2xl animate-pulse" />
-            ))}
-          </div>
+          [...Array(5)].map((_, i) => (
+            <div key={i} style={{ height: '64px', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '12px', opacity: 1 - i * 0.15 }} />
+          ))
         ) : logs.length === 0 ? (
-          /* Empty Feed */
-          <div className="bg-bg-surface border border-border rounded-2xl py-16 text-center space-y-3 shadow-sm">
-            <div className="inline-flex p-4 bg-bg-subtle border border-border rounded-2xl text-text-secondary">
-              <History size={32} />
+          <div style={{ ...card, padding: '60px 24px', textAlign: 'center' }}>
+            <div style={{ display: 'inline-flex', padding: '16px', backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border)', borderRadius: '12px', marginBottom: '16px' }}>
+              <History size={28} style={{ color: 'var(--text-muted)' }} />
             </div>
-            <h3 className="text-lg font-bold text-text-primary">No activities logged</h3>
-            <p className="text-sm text-text-secondary font-light max-w-sm mx-auto">
-              We couldn't locate any events matching your selected filter guidelines.
+            <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>No activities found</h3>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, fontWeight: 300 }}>
+              No events match your selected filters.
             </p>
           </div>
         ) : (
-          /* Logs Stream list */
-          <div className="space-y-3">
-            {logs.map((log) => {
-              const isExpanded = expandedLogId === log.id;
-              
-              return (
-                <div 
-                  key={log.id}
-                  className="bg-bg-surface border border-border rounded-2xl overflow-hidden hover-lift transition-all duration-300"
+          logs.map((log) => {
+            const isExpanded = expandedLogId === log.id;
+            return (
+              <div
+                key={log.id}
+                style={{
+                  ...card,
+                  overflow: 'hidden',
+                  transition: 'border-color 0.15s ease',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+                onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
+              >
+                <div
+                  onClick={() => toggleExpand(log.id)}
+                  style={{
+                    padding: '16px 20px',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px',
+                    cursor: 'pointer',
+                  }}
                 >
-                  {/* Summary Card Header bar */}
-                  <div 
-                    onClick={() => toggleExpand(log.id)}
-                    className="p-4 md:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      {/* User initials circle */}
-                      <div className="w-10 h-10 rounded-xl bg-bg-subtle border border-border flex items-center justify-center font-bold text-sm text-accent shrink-0 shadow-inner select-none">
-                        {log.actor_name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                      </div>
-                      
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-sm font-bold text-text-primary">{log.actor_name}</span>
-                          {getActionBadge(log.action)}
-                        </div>
-                        <p className="text-sm font-light leading-relaxed mt-1 text-text-secondary truncate">
-                          {renderSummaryText(log)}
-                        </p>
-                      </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
+                    {/* Initials */}
+                    <div style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '8px',
+                      backgroundColor: 'var(--bg-container)',
+                      border: '1px solid var(--border)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      color: 'var(--accent)',
+                      flexShrink: 0,
+                      userSelect: 'none',
+                    }}>
+                      {log.actor_name.split(' ').map((n) => n[0]).join('').toUpperCase()}
                     </div>
 
-                    <div className="flex items-center justify-between sm:justify-end gap-3 self-end sm:self-auto text-xs text-text-secondary">
-                      <span className="font-tabular font-light">
-                        {new Date(log.timestamp).toLocaleString('en-IN', {
-                          day: '2-digit',
-                          month: 'short',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          hour12: true,
-                          timeZone: 'Asia/Kolkata'
-                        })}
-                      </span>
-                      {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', flexShrink: 0 }}>
+                          {log.actor_name}
+                        </span>
+                        {getActionBadge(log.action)}
+                      </div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 300 }}>
+                        {renderSummaryText(log)}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Expanded JSON Diffs view panel */}
-                  {isExpanded && (
-                    <div className="px-5 pb-5 pt-1 border-t border-border/80 bg-bg-subtle/30 animate-fadeIn">
-                      <div className="space-y-3">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
-                          <FileJson size={14} className="text-accent" />
-                          <span>Audit State Diff</span>
-                        </h4>
-
-                        <div className="relative rounded-2xl border border-border bg-bg-subtle p-4 overflow-x-auto max-h-[300px]">
-                          <pre className="text-xs font-mono text-text-primary leading-relaxed whitespace-pre font-tabular">
-                            {JSON.stringify(log.snapshot, null, 2)}
-                          </pre>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)', fontWeight: 400 }}>
+                      {new Date(log.timestamp).toLocaleString('en-IN', {
+                        day: '2-digit',
+                        month: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true,
+                        timeZone: 'Asia/Kolkata',
+                      })}
+                    </span>
+                    {isExpanded ? <ChevronUp size={15} style={{ color: 'var(--text-muted)' }} /> : <ChevronDown size={15} style={{ color: 'var(--text-muted)' }} />}
+                  </div>
                 </div>
-              );
-            })}
-          </div>
+
+                {isExpanded && (
+                  <div
+                    className="animate-slideDown"
+                    style={{
+                      borderTop: '1px solid var(--border)',
+                      padding: '16px 20px',
+                      backgroundColor: 'var(--bg-subtle)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
+                      <FileJson size={13} style={{ color: 'var(--accent)' }} />
+                      <h4 style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: 0 }}>
+                        Audit State Snapshot
+                      </h4>
+                    </div>
+                    <div style={{ borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-surface)', padding: '14px', maxHeight: '280px', overflowX: 'auto', overflowY: 'auto' }}>
+                      <pre style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', lineHeight: 1.6, margin: 0, whiteSpace: 'pre' }}>
+                        {JSON.stringify(log.snapshot, null, 2)}
+                      </pre>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
 
-        {/* Pagination footer controls */}
+        {/* Pagination */}
         {!isLoading && logs.length > 0 && (
-          <div className="flex items-center justify-between p-4 border border-border rounded-2xl bg-bg-surface text-xs">
-            <span className="text-text-secondary font-light">
-              Showing <span className="font-bold text-text-primary font-tabular">{(page - 1) * 50 + 1}</span> to{' '}
-              <span className="font-bold text-text-primary font-tabular">{Math.min(page * 50, totalCount)}</span> of{' '}
-              <span className="font-bold text-text-primary font-tabular">{totalCount}</span> logs
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            borderRadius: '12px',
+            border: '1px solid var(--border)',
+            backgroundColor: 'var(--bg-surface)',
+            fontSize: '12px',
+          }}>
+            <span style={{ color: 'var(--text-secondary)' }}>
+              Showing{' '}
+              <strong style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{(page - 1) * 50 + 1}</strong>
+              {' '}–{' '}
+              <strong style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{Math.min(page * 50, totalCount)}</strong>
+              {' '}of{' '}
+              <strong style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{totalCount}</strong>
+              {' '}logs
             </span>
-
-            <div className="flex items-center gap-2">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <button
                 onClick={() => setPage(p => Math.max(p - 1, 1))}
                 disabled={page === 1}
-                className="p-1.5 rounded-lg border border-border bg-bg-surface text-text-secondary disabled:opacity-50 disabled:pointer-events-none hover:bg-bg-subtle cursor-pointer transition-all"
+                style={{
+                  padding: '6px',
+                  borderRadius: '7px',
+                  border: '1px solid var(--border)',
+                  backgroundColor: 'var(--bg-surface)',
+                  color: 'var(--text-secondary)',
+                  cursor: page === 1 ? 'not-allowed' : 'pointer',
+                  opacity: page === 1 ? 0.4 : 1,
+                  display: 'flex',
+                }}
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft size={15} />
               </button>
-              <span className="font-bold font-tabular px-2">
-                Page {page} of {totalPages}
+              <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--text-primary)', padding: '0 8px' }}>
+                {page} / {totalPages}
               </span>
               <button
                 onClick={() => setPage(p => Math.min(p + 1, totalPages))}
                 disabled={page === totalPages}
-                className="p-1.5 rounded-lg border border-border bg-bg-surface text-text-secondary disabled:opacity-50 disabled:pointer-events-none hover:bg-bg-subtle cursor-pointer transition-all"
+                style={{
+                  padding: '6px',
+                  borderRadius: '7px',
+                  border: '1px solid var(--border)',
+                  backgroundColor: 'var(--bg-surface)',
+                  color: 'var(--text-secondary)',
+                  cursor: page === totalPages ? 'not-allowed' : 'pointer',
+                  opacity: page === totalPages ? 0.4 : 1,
+                  display: 'flex',
+                }}
               >
-                <ChevronRight size={16} />
+                <ChevronRight size={15} />
               </button>
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

@@ -1,46 +1,78 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════
+   reOWN Spends — Quiet Luxury Fintech Design System
+   Generated from Stitch MCP + Impeccable design laws
+   ═══════════════════════════════════════════════════════ */
+
 :root {
-  /* Light Mode Palette - Quiet Luxury Warm Paper */
-  --bg-base: #fff8f3;
-  --bg-surface: #ffffff;
-  --bg-subtle: #f9f2ed;
-  --accent: #feb904;
-  --accent-fg: #000000;
-  --text-primary: #1d1b18;
-  --text-secondary: #5f5e5c;
-  --text-muted: #837560;
-  --border: #e5e2de;
+  /* Light Mode — Warm Paper Palette */
+  --bg-base: #fff8f3;          /* Level 0: canvas, warm paper */
+  --bg-surface: #ffffff;       /* Level 1: cards, containers */
+  --bg-subtle: #f9f2ed;        /* Level 2: hover, section fills */
+  --bg-container: #f3ede8;     /* Level 3: table headers, tags */
+  --bg-container-high: #eee7e2; /* Level 4: active tags */
+
+  --accent: #feb904;           /* Amber: primary action, logo accent */
+  --accent-dim: #e0a403;       /* Amber hover state */
+  --accent-fg: #1d1b18;        /* Text on amber backgrounds */
+
+  --text-primary: #1d1b18;     /* Near-black charcoal */
+  --text-secondary: #504532;   /* Warm mid-tone */
+  --text-muted: #837560;       /* Tertiary: labels, hints */
+
+  --border: #e5e0db;           /* 1px structural border — taupe */
+  --border-soft: #d5c4ac;      /* Soft variant */
+
   --danger: #ba1a1a;
   --danger-fg: #ffffff;
+  --danger-light: #ffdad6;
+
+  --success: #2e7d32;
+  --success-light: #e8f5e9;
 
   --background: var(--bg-base);
   --foreground: var(--text-primary);
 }
 
-/* Dark Mode Palette - Sophisticated Charcoal */
+/* Dark Mode — Sophisticated Warm Charcoal */
 .dark {
   --bg-base: #1c1c1a;
   --bg-surface: #242422;
   --bg-subtle: #2e2e2c;
+  --bg-container: #323230;
+  --bg-container-high: #3a3a38;
+
   --accent: #feb904;
+  --accent-dim: #e0a403;
   --accent-fg: #000000;
-  --text-primary: #f6efeb;
-  --text-secondary: #c8c6c3;
-  --text-muted: #837560;
+
+  --text-primary: #f0e9e4;
+  --text-secondary: #cac4be;
+  --text-muted: #937e6a;
+
   --border: #2e2e2b;
+  --border-soft: #3e3e3b;
+
   --danger: #e05c4a;
   --danger-fg: #ffffff;
+  --danger-light: rgba(224, 92, 74, 0.12);
+
+  --success: #4caf50;
+  --success-light: rgba(76, 175, 80, 0.12);
 
   --background: var(--bg-base);
   --foreground: var(--text-primary);
 }
 
+/* ═══ Tailwind v4 theme extension ═══ */
 @theme {
   --color-bg-base: var(--bg-base);
   --color-bg-surface: var(--bg-surface);
   --color-bg-subtle: var(--bg-subtle);
+  --color-bg-container: var(--bg-container);
   --color-accent: var(--accent);
+  --color-accent-dim: var(--accent-dim);
   --color-accent-fg: var(--accent-fg);
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
@@ -48,10 +80,20 @@
   --color-border: var(--border);
   --color-danger: var(--danger);
   --color-danger-fg: var(--danger-fg);
-  
-  --font-display: var(--font-display), sans-serif;
-  --font-sans: var(--font-sans), sans-serif;
-  --font-mono: var(--font-mono), monospace;
+  --color-success: var(--success);
+
+  --font-display: var(--font-display), 'Sora', sans-serif;
+  --font-sans: var(--font-sans), 'Plus Jakarta Sans', sans-serif;
+  --font-mono: var(--font-mono), 'Geist Mono', monospace;
+}
+
+/* ═══ Base ═══ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -61,49 +103,167 @@ body {
   min-height: 100vh;
   margin: 0;
   padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
-/* Custom scrollbars for a premium feel */
+/* ═══ Custom Scrollbars — Premium Thin ═══ */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 10px;
+  border-radius: 100px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
 
-/* Standard glassmorphism & cards animations */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
-}
-
-.dark .glass-panel {
-  background: rgba(28, 28, 26, 0.7);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
-}
-
-/* Micro-animations: Quiet Luxury Hover Lift */
-.hover-lift {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
-}
-.hover-lift:hover {
-  transform: translateY(-3px);
-  border-color: var(--accent) !important;
-}
-
-/* Monospace with tabular numerals for perfect table alignment */
+/* ═══ Typography Utilities ═══ */
 .font-tabular {
   font-variant-numeric: tabular-nums;
   font-family: var(--font-mono);
+  letter-spacing: -0.01em;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* ═══ Micro-animations (Impeccable laws: ease-out-quart only) ═══ */
+/* No bounces. No elastics. No layout property animations. */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideLeft {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.animate-fadeIn  { animation: fadeIn  0.2s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-slideDown { animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-slideUp   { animation: slideUp   0.25s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-slideLeft { animation: slideLeft 0.3s  cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-scaleIn   { animation: scaleIn   0.2s  cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* ═══ Loading spinner ═══ */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ═══ Pulse (skeletons) ═══ */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ═══ Hover State: Quiet Transition (no transform, only color) ═══ */
+/* Impeccable rule: "Don't animate CSS layout properties" */
+.card-hover {
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  border: 1px solid var(--border);
+}
+.card-hover:hover {
+  border-color: var(--accent);
+  background-color: var(--bg-subtle);
+}
+
+/* ═══ Form Input Base ═══ */
+.input-base {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  transition: border-color 0.15s ease;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.input-base:focus {
+  border-color: var(--accent);
+}
+
+.input-base::placeholder {
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+/* ═══ Table Row Hover ═══ */
+.table-row-hover {
+  transition: background-color 0.15s ease;
+  cursor: pointer;
+}
+.table-row-hover:hover {
+  background-color: var(--bg-subtle);
+}
+
+/* ═══ Tag/Badge ═══ */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  background: var(--bg-container);
+  color: var(--text-secondary);
+}
+
+/* ═══ Status Dots ═══ */
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* ═══ Quiet Dividers ═══ */
+.divider {
+  height: 1px;
+  background-color: var(--border);
+}
+
+/* ═══ FAB — Quick Add float button ═══ */
+/* On desktop: sits 32px from bottom. On mobile: sits above 60px tab bar */
+.fab-btn {
+  bottom: 32px !important;
+  right: 32px !important;
+}
+@media (max-width: 767px) {
+  .fab-btn {
+    bottom: 76px !important;  /* 60px tab bar + 16px gap */
+    right: 16px !important;
+  }
 }
 

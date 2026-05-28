@@ -4,7 +4,6 @@ import { getCurrentUser } from '@/lib/auth-server';
 
 export async function GET(request: Request) {
   try {
-    // 1. Authenticate user session
     const session = await getCurrentUser(request);
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized session.' }, { status: 401 });
@@ -12,15 +11,14 @@ export async function GET(request: Request) {
 
     const supabase = getSupabaseAdmin();
 
-    // 2. Fetch fresh user metadata from DB
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, name, email')
+      .select('id, name, username')
       .eq('id', session.userId)
       .maybeSingle();
 
     if (error || !user) {
-      console.error('Error fetching verified profile me-metadata:', error?.message);
+      console.error('Error fetching user profile:', error?.message);
       return NextResponse.json({ error: 'User not found.' }, { status: 404 });
     }
 
@@ -29,11 +27,11 @@ export async function GET(request: Request) {
       user: {
         id: user.id,
         name: user.name,
-        email: user.email
-      }
+        username: user.username,
+      },
     });
   } catch (err: any) {
-    console.error('Unhandled profile me-fetch error:', err);
+    console.error('Unhandled profile fetch error:', err);
     return NextResponse.json(
       { error: 'An unexpected error occurred.' },
       { status: 500 }

@@ -2,7 +2,7 @@ import { verifyJWT } from './auth-jwt';
 
 export interface UserSession {
   userId: string;
-  email: string;
+  username: string;
   name: string;
   rememberMe: boolean;
 }
@@ -19,14 +19,10 @@ export async function getCurrentUser(request: Request): Promise<UserSession | nu
     );
     const sessionToken = cookies['reown_spends_session'];
 
-    if (!sessionToken) {
-      return null;
-    }
+    if (!sessionToken) return null;
 
     const payload = await verifyJWT(sessionToken);
-    if (!payload || !payload.userId) {
-      return null;
-    }
+    if (!payload || !payload.userId) return null;
 
     return payload as unknown as UserSession;
   } catch (error) {

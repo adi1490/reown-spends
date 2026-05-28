@@ -19,34 +19,17 @@ export async function GET(request: Request) {
 
     const supabase = getSupabaseAdmin();
 
-    // Construct base query joining audit log with users metadata
     let query = supabase
       .from('audit_log')
-      .select('*, users!audit_log_performed_by_fkey(name, email)', { count: 'exact' });
+      .select('*, users!audit_log_performed_by_fkey(name, username)', { count: 'exact' });
 
-    // Filter by Actor (User UUID)
-    if (actor) {
-      query = query.eq('performed_by', actor);
-    }
+    if (actor) query = query.eq('performed_by', actor);
+    if (action) query = query.eq('action', action);
+    if (startDate) query = query.gte('timestamp', startDate);
+    if (endDate) query = query.lte('timestamp', `${endDate}T23:59:59.999Z`);
 
-    // Filter by Action Type (CREATED/UPDATED/DELETED)
-    if (action) {
-      query = query.eq('action', action);
-    }
-
-    // Filter by Date Range
-    if (startDate) {
-      query = query.gte('timestamp', startDate);
-    }
-    if (endDate) {
-      // Allow the full day for the end date by suffixing 23:59:59
-      query = query.lte('timestamp', `${endDate}T23:59:59.999Z`);
-    }
-
-    // Chronological order (newest first)
     query = query.order('timestamp', { ascending: false });
 
-    // Pagination bounds
     const from = (page - 1) * limit;
     const to = from + limit - 1;
     query = query.range(from, to);
@@ -61,15 +44,13 @@ export async function GET(request: Request) {
     const totalCount = count || 0;
     const totalPages = Math.ceil(totalCount / limit);
 
-    // Map logs to clean frontend structure
     const mappedLogs = (logs || []).map((log: any) => ({
       ...log,
       actor_name: log.users?.name || 'Unknown User',
-      actor_email: log.users?.email || '',
-      users: undefined
+      actor_username: log.users?.username || '',
+      users: undefined,
     }));
 
-    // Also fetch list of users to populate actor filter dropdown
     const { data: dbUsers } = await supabase
       .from('users')
       .select('id, name');
@@ -80,7 +61,7 @@ export async function GET(request: Request) {
       totalCount,
       page,
       totalPages,
-      limit
+      limit,
     });
   } catch (err: any) {
     console.error('Unexpected error in GET /api/activity:', err);

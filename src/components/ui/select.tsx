@@ -14,7 +14,6 @@ interface CustomSelectProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
-  dropdownClassName?: string;
 }
 
 export function CustomSelect({
@@ -23,18 +22,13 @@ export function CustomSelect({
   onChange,
   placeholder = 'Select option',
   className = '',
-  dropdownClassName = '',
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Normalize options to Option[]
-  const normalizedOptions: Option[] = options.map((opt) => {
-    if (typeof opt === 'string') {
-      return { value: opt, label: opt };
-    }
-    return opt;
-  });
+  const normalizedOptions: Option[] = options.map((opt) =>
+    typeof opt === 'string' ? { value: opt, label: opt } : opt
+  );
 
   const selectedOption = normalizedOptions.find((opt) => opt.value === value);
 
@@ -53,19 +47,54 @@ export function CustomSelect({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between p-2.5 rounded-xl border border-border bg-bg-subtle text-text-primary text-xs font-semibold focus:outline-none focus:border-accent focus:ring-4 focus:ring-accent/15 transition-all text-left cursor-pointer ${className}`}
+        className={`w-full flex items-center justify-between text-left cursor-pointer ${className}`}
+        style={{
+          padding: '9px 13px',
+          borderRadius: '8px',
+          border: '1px solid var(--border)',
+          backgroundColor: 'var(--bg-surface)',
+          color: selectedOption ? 'var(--text-primary)' : 'var(--text-muted)',
+          fontSize: '13px',
+          fontWeight: selectedOption ? 500 : 300,
+          outline: 'none',
+          transition: 'border-color 0.15s ease',
+        }}
+        onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+        onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
       >
-        <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
         <ChevronDown
-          size={16}
-          className={`text-text-secondary shrink-0 transition-transform duration-200 ${
-            isOpen ? 'rotate-180 text-accent' : ''
-          }`}
+          size={15}
+          style={{
+            flexShrink: 0,
+            marginLeft: '8px',
+            color: 'var(--text-muted)',
+            transform: isOpen ? 'rotate(180deg)' : 'none',
+            transition: 'transform 0.2s cubic-bezier(0.16,1,0.3,1)',
+          }}
         />
       </button>
 
       {isOpen && (
-        <div className={`absolute left-0 right-0 mt-1.5 rounded-xl border border-border bg-bg-surface shadow-xl z-[999] py-1 max-h-60 overflow-y-auto animate-fadeIn backdrop-blur-md ${dropdownClassName}`}>
+        <div
+          className="animate-scaleIn"
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: 'calc(100% + 6px)',
+            borderRadius: '10px',
+            border: '1px solid var(--border)',
+            backgroundColor: 'var(--bg-surface)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+            zIndex: 999,
+            maxHeight: '240px',
+            overflowY: 'auto',
+            padding: '4px',
+          }}
+        >
           {normalizedOptions.map((option) => {
             const isSelected = option.value === value;
             return (
@@ -76,12 +105,35 @@ export function CustomSelect({
                   onChange(option.value);
                   setIsOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs text-left cursor-pointer hover:bg-bg-subtle transition-colors ${
-                  isSelected ? 'bg-accent/10 text-[#cda005] dark:text-[#feb904] font-bold' : 'text-text-primary font-light'
-                }`}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '8px 12px',
+                  borderRadius: '7px',
+                  border: 'none',
+                  backgroundColor: isSelected ? 'var(--bg-container)' : 'transparent',
+                  color: isSelected ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  fontSize: '13px',
+                  fontWeight: isSelected ? 600 : 400,
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'background-color 0.1s ease',
+                }}
+                onMouseEnter={e => {
+                  if (!isSelected) e.currentTarget.style.backgroundColor = 'var(--bg-subtle)';
+                }}
+                onMouseLeave={e => {
+                  if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent';
+                }}
               >
-                <span className="truncate">{option.label}</span>
-                {isSelected && <Check size={14} className="text-accent shrink-0 ml-2" />}
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {option.label}
+                </span>
+                {isSelected && (
+                  <Check size={13} style={{ flexShrink: 0, marginLeft: '8px', color: 'var(--accent)' }} />
+                )}
               </button>
             );
           })}
