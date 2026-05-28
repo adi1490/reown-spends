@@ -133,7 +133,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           cursor: isSidebarCollapsed ? 'pointer' : 'default',
           overflow: 'hidden',
         }}
-        className="hidden md:flex flex-col sticky top-0 h-screen z-30"
+        className="desktop-sidebar"
         // Click anywhere on the collapsed sidebar to expand
         onClick={(e) => {
           if (!isSidebarCollapsed) return;
@@ -169,7 +169,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
             {!isSidebarCollapsed && (
               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '14px', color: 'var(--text-primary)', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
-                OWN <span style={{ color: 'var(--accent)' }}>Spends</span>
+                reOWN <span style={{ color: 'var(--accent)' }}>Spends</span>
               </span>
             )}
           </Link>
@@ -307,7 +307,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* ─── MOBILE LAYOUT ─── */}
-      <div className="md:hidden" style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div className="mobile-layout">
         {/* Mobile top bar */}
         <header style={{
           height: '52px', backgroundColor: 'var(--bg-surface)',
@@ -323,7 +323,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '11px', color: 'var(--accent-fg)' }}>re</span>
             </div>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '13px', color: 'var(--text-primary)' }}>
-              OWN <span style={{ color: 'var(--accent)' }}>Spends</span>
+              reOWN <span style={{ color: 'var(--accent)' }}>Spends</span>
             </span>
           </Link>
 
@@ -455,7 +455,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
 
       {/* ─── DESKTOP MAIN CONTENT ─── */}
-      <main className="hidden md:flex flex-1 flex-col min-w-0">
+      <main className="desktop-main">
         <div style={{ flex: 1, padding: '40px 48px', maxWidth: '1400px', width: '100%', margin: '0 auto' }}>
           {children}
         </div>
