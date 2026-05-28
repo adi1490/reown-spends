@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { CustomSelect } from '@/components/ui/select';
 import { 
   TrendingUp, 
   Layers, 
@@ -72,6 +73,15 @@ const PAYMENT_SOURCES = [
   { value: 'Puneet (Personal)', label: '👤 Puneet – Personal' },
   { value: 'Narasimha (Personal)', label: '👤 Narasimha – Personal' },
   { value: 'Prasanna (Personal)', label: '👤 Prasanna – Personal' }
+];
+
+const DATE_PRESET_OPTIONS = [
+  { value: 'this-month', label: 'This Month' },
+  { value: 'last-month', label: 'Last Month' },
+  { value: 'last-3-months', label: 'Last 3 Months' },
+  { value: 'last-6-months', label: 'Last 6 Months' },
+  { value: 'this-year', label: 'This Year' },
+  { value: 'custom', label: 'Custom Range' },
 ];
 
 // Curated charting color palette
@@ -313,19 +323,13 @@ export default function Dashboard() {
         </div>
 
         {/* Global Filter Bar */}
-        <div className="bg-bg-surface border border-border p-2 rounded-2xl flex flex-wrap items-center gap-2 shadow-sm self-start xl:self-auto max-w-full">
-          <select
+        <div className="bg-bg-surface border border-border p-2 rounded-2xl flex flex-wrap items-center gap-2 shadow-sm self-start xl:self-auto max-w-full z-[100]">
+          <CustomSelect
+            options={DATE_PRESET_OPTIONS}
             value={datePreset}
-            onChange={(e) => setDatePreset(e.target.value)}
-            className="px-3 py-1.5 rounded-xl border border-border bg-bg-subtle text-text-primary text-xs font-semibold focus:outline-none cursor-pointer"
-          >
-            <option value="this-month">This Month</option>
-            <option value="last-month">Last Month</option>
-            <option value="last-3-months">Last 3 Months</option>
-            <option value="last-6-months">Last 6 Months</option>
-            <option value="this-year">This Year</option>
-            <option value="custom">Custom Range</option>
-          </select>
+            onChange={setDatePreset}
+            className="min-w-[150px]"
+          />
 
           {datePreset === 'custom' && (
             <div className="flex items-center gap-2 animate-fadeIn">
@@ -654,13 +658,13 @@ export default function Dashboard() {
                 />
               </div>
 
-              {/* Vendor */}
+              {/* Paid To */}
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Vendor</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Paid To</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. AWS, Swiggy, Uber"
+                  placeholder="Paid to (e.g. AWS, Swiggy, Uber)"
                   value={formVendor}
                   onChange={(e) => setFormVendor(e.target.value)}
                   className={`w-full p-2.5 rounded-xl border bg-bg-subtle text-text-primary text-xs focus:outline-none focus:border-accent ${
@@ -673,29 +677,21 @@ export default function Dashboard() {
                 {/* Category */}
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Category</label>
-                  <select
+                  <CustomSelect
+                    options={CATEGORIES.map(cat => ({ value: cat, label: cat }))}
                     value={formCategory}
-                    onChange={(e) => setFormCategory(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-border bg-bg-subtle text-text-primary text-xs focus:outline-none"
-                  >
-                    {CATEGORIES.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
+                    onChange={setFormCategory}
+                  />
                 </div>
 
-                {/* Paid By */}
+                {/* Paid From */}
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Paid By</label>
-                  <select
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Paid From</label>
+                  <CustomSelect
+                    options={PAYMENT_SOURCES}
                     value={formPaidBy}
-                    onChange={(e) => setFormPaidBy(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-border bg-bg-subtle text-text-primary text-xs focus:outline-none"
-                  >
-                    {PAYMENT_SOURCES.map(source => (
-                      <option key={source.value} value={source.value}>{source.label.split(' ')[0]}</option>
-                    ))}
-                  </select>
+                    onChange={setFormPaidBy}
+                  />
                 </div>
               </div>
 

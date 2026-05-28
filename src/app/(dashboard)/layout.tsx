@@ -124,7 +124,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="h-16 flex items-center justify-between px-5 border-b border-border">
           <Link href="/" className="flex items-center gap-3 select-none">
             <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-accent text-accent-fg shadow-sm shrink-0">
-              <span className="font-display font-extrabold text-lg">re</span>
+              <svg viewBox="0 0 32 32" className="w-5 h-5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8.2 21.8c2.8 2.8 7.2 3.2 10.8 1.8 3.2-1.2 5.5-4.2 6.2-7.8.2-.8-.4-1.5-1.2-1.5-.6 0-1.1.4-1.3.9-.8 2.1-2.2 3.8-4.2 4.8s-4.2 1.2-6.5.6c-1.5-.4-2.5-1.2-3-2-.5-.8-.7-1.8-1.1-2.8C7.5 12.8 7 12.2 6.2 12.2c-.8 0-1.5.7-1.5 1.5.1 3 1.2 6 3.5 8.1zM23.5 8.5c.5 0 1-.5 1-1s-.5-1-1-1h-3c-.5 0-1 .5-1 1s.5 1 1 1h3z" fill="currentColor"/>
+              </svg>
             </div>
             {!isSidebarCollapsed && (
               <span className="font-display font-extrabold text-lg tracking-tight">
@@ -207,7 +209,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <header className="md:hidden flex items-center justify-between bg-bg-surface border-b border-border px-4 h-16 sticky top-0 z-30 w-full transition-colors duration-300">
         <Link href="/" className="flex items-center gap-2">
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-accent text-accent-fg shadow-sm">
-            <span className="font-display font-extrabold text-md">re</span>
+            <svg viewBox="0 0 32 32" className="w-4.5 h-4.5" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8.2 21.8c2.8 2.8 7.2 3.2 10.8 1.8 3.2-1.2 5.5-4.2 6.2-7.8.2-.8-.4-1.5-1.2-1.5-.6 0-1.1.4-1.3.9-.8 2.1-2.2 3.8-4.2 4.8s-4.2 1.2-6.5.6c-1.5-.4-2.5-1.2-3-2-.5-.8-.7-1.8-1.1-2.8C7.5 12.8 7 12.2 6.2 12.2c-.8 0-1.5.7-1.5 1.5.1 3 1.2 6 3.5 8.1zM23.5 8.5c.5 0 1-.5 1-1s-.5-1-1-1h-3c-.5 0-1 .5-1 1s.5 1 1 1h3z" fill="currentColor"/>
+            </svg>
           </div>
           <span className="font-display font-extrabold text-md tracking-tight">
             re<span className="font-normal opacity-90">OWN</span> <span className="text-[#feb904] font-semibold">Spends</span>

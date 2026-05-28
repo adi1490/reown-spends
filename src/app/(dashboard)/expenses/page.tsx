@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { CustomSelect } from '@/components/ui/select';
 import { 
   Search, 
   Filter, 
@@ -600,7 +601,7 @@ export default function ExpensesPage() {
                       {sortBy === 'date' && <ArrowUpDown size={12} className="text-accent" />}
                     </div>
                   </th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-wider text-text-secondary">Vendor</th>
+                  <th className="p-4 text-[10px] font-bold uppercase tracking-wider text-text-secondary">Paid To</th>
                   <th className="p-4 text-[10px] font-bold uppercase tracking-wider text-text-secondary cursor-pointer select-none" onClick={() => { setSortBy('category'); setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc'); }}>
                     <div className="flex items-center gap-1.5">
                       <span>Category</span>
@@ -609,7 +610,7 @@ export default function ExpensesPage() {
                   </th>
                   <th className="p-4 text-[10px] font-bold uppercase tracking-wider text-text-secondary cursor-pointer select-none" onClick={() => { setSortBy('paid_by'); setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc'); }}>
                     <div className="flex items-center gap-1.5">
-                      <span>Paid By</span>
+                      <span>Paid From</span>
                       {sortBy === 'paid_by' && <ArrowUpDown size={12} className="text-accent" />}
                     </div>
                   </th>
@@ -753,7 +754,7 @@ export default function ExpensesPage() {
                   <p className="text-text-primary mt-1 font-semibold">{selectedExpense.category}</p>
                 </div>
                 <div className="col-span-2 border-t border-border pt-4">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Paid Funding Source</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Paid From</p>
                   <p className="text-text-primary mt-1 font-semibold">{getSourceLabel(selectedExpense.paid_by)}</p>
                 </div>
                 <div className="col-span-2 border-t border-border pt-4">
@@ -890,13 +891,13 @@ export default function ExpensesPage() {
                 {errors.amount && <p className="text-xs text-danger font-medium mt-1">{errors.amount}</p>}
               </div>
 
-              {/* Vendor Input */}
+              {/* Paid To Input */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Vendor Name</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Paid To</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. AWS, Swiggy, Ola"
+                  placeholder="Paid to (e.g. AWS, Swiggy, Ola)"
                   value={formVendor}
                   onChange={(e) => setFormVendor(e.target.value)}
                   className={`w-full p-3 rounded-2xl border bg-bg-subtle/50 text-text-primary text-sm focus:outline-none focus:border-accent focus:bg-bg-surface focus:ring-4 focus:ring-accent/15 transition-all ${
@@ -909,29 +910,21 @@ export default function ExpensesPage() {
               {/* Category Dropdown */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Category Segment</label>
-                <select
+                <CustomSelect
+                  options={CATEGORIES.map(cat => ({ value: cat, label: cat }))}
                   value={formCategory}
-                  onChange={(e) => setFormCategory(e.target.value)}
-                  className="w-full p-3 rounded-2xl border border-border bg-bg-subtle/50 text-text-primary text-sm focus:outline-none focus:border-accent focus:bg-bg-surface focus:ring-4 focus:ring-accent/15 transition-all"
-                >
-                  {CATEGORIES.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
+                  onChange={setFormCategory}
+                />
               </div>
 
-              {/* Paid By Dropdown */}
+              {/* Paid From Dropdown */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Funding Source</label>
-                <select
+                <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Paid From</label>
+                <CustomSelect
+                  options={PAYMENT_SOURCES}
                   value={formPaidBy}
-                  onChange={(e) => setFormPaidBy(e.target.value)}
-                  className="w-full p-3 rounded-2xl border border-border bg-bg-subtle/50 text-text-primary text-sm focus:outline-none focus:border-accent focus:bg-bg-surface focus:ring-4 focus:ring-accent/15 transition-all"
-                >
-                  {PAYMENT_SOURCES.map(source => (
-                    <option key={source.value} value={source.value}>{source.label}</option>
-                  ))}
-                </select>
+                  onChange={setFormPaidBy}
+                />
               </div>
 
               {/* Description textarea */}

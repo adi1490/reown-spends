@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { CustomSelect } from '@/components/ui/select';
 import { 
   History, 
   User, 
@@ -200,31 +201,29 @@ export default function ActivityLogPage() {
             {/* Filter by Actor */}
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Performed By</label>
-              <select
+              <CustomSelect
+                options={[
+                  { value: '', label: 'All Founders' },
+                  ...actors.map(act => ({ value: act.id, label: act.name }))
+                ]}
                 value={selectedActor}
-                onChange={(e) => { setSelectedActor(e.target.value); setPage(1); }}
-                className="w-full p-2.5 rounded-xl border border-border bg-bg-subtle text-text-primary text-xs focus:outline-none focus:border-accent"
-              >
-                <option value="">All Founders</option>
-                {actors.map(act => (
-                  <option key={act.id} value={act.id}>{act.name}</option>
-                ))}
-              </select>
+                onChange={(val) => { setSelectedActor(val); setPage(1); }}
+              />
             </div>
 
             {/* Filter by Action */}
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Action Type</label>
-              <select
+              <CustomSelect
+                options={[
+                  { value: '', label: 'All Actions' },
+                  { value: 'CREATED', label: 'CREATED' },
+                  { value: 'UPDATED', label: 'UPDATED' },
+                  { value: 'DELETED', label: 'DELETED' }
+                ]}
                 value={selectedAction}
-                onChange={(e) => { setSelectedAction(e.target.value); setPage(1); }}
-                className="w-full p-2.5 rounded-xl border border-border bg-bg-subtle text-text-primary text-xs focus:outline-none focus:border-accent"
-              >
-                <option value="">All Actions</option>
-                <option value="CREATED">CREATED</option>
-                <option value="UPDATED">UPDATED</option>
-                <option value="DELETED">DELETED</option>
-              </select>
+                onChange={(val) => { setSelectedAction(val); setPage(1); }}
+              />
             </div>
 
             {/* Start Date */}
