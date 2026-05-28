@@ -65,6 +65,16 @@ export default function SettingsPage() {
   });
 
   useEffect(() => {
+    // Read cache immediately — no flash, no loading state
+    try {
+      const cached = localStorage.getItem('reown_user');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.name) setCurrentUser({ name: parsed.name, username: parsed.username || '' });
+      }
+    } catch { /* ignore */ }
+
+    // Background refresh to stay in sync
     const fetchUserProfile = async () => {
       try {
         const res = await fetch('/api/auth/me');
@@ -72,6 +82,7 @@ export default function SettingsPage() {
           const data = await res.json();
           if (data.success && data.user) {
             setCurrentUser({ name: data.user.name, username: data.user.username });
+            localStorage.setItem('reown_user', JSON.stringify({ name: data.user.name, username: data.user.username }));
           }
         }
       } catch (err) {
@@ -180,7 +191,7 @@ export default function SettingsPage() {
                 {currentUser ? getInitials(currentUser.name) : '?'}
               </div>
               <p style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-                {currentUser?.name || 'Loading...'}
+                {currentUser?.name ?? ''}
               </p>
               {currentUser?.username && (
                 <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: '2px 0 4px', fontFamily: 'var(--font-mono)', fontWeight: 400 }}>
