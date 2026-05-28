@@ -317,7 +317,7 @@ export default function ExpensesPage() {
   // ─── Shared drawer panel ───
   const DrawerOverlay = ({ children }: { children: React.ReactNode }) => (
     <div
-      className="animate-fadeIn"
+      className="animate-fadeIn mobile-drawer-overlay"
       style={{
         position: 'fixed',
         inset: 0,
@@ -329,7 +329,7 @@ export default function ExpensesPage() {
     >
       <div style={{ flex: 1 }} onClick={() => setActiveDrawer(null)} />
       <div
-        className="animate-slideLeft"
+        className="animate-slideLeft mobile-drawer-panel"
         style={{
           width: '100%',
           maxWidth: '500px',
@@ -1112,7 +1112,7 @@ export default function ExpensesPage() {
       {/* ─── Delete Confirm Modal ─── */}
       {showDeleteConfirm && (
         <div
-          className="animate-fadeIn"
+          className="animate-fadeIn mobile-modal-overlay"
           style={{ position: 'fixed', inset: 0, zIndex: 100, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
         >
           <div

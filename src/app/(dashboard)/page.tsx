@@ -657,7 +657,7 @@ export default function Dashboard() {
       {/* ─── Quick Add Modal ─── */}
       {showQuickAdd && (
         <div
-          className="animate-fadeIn"
+          className="animate-fadeIn mobile-modal-overlay"
           style={{
             position: 'fixed',
             inset: 0,

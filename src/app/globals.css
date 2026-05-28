@@ -254,6 +254,47 @@ body {
   background-color: var(--border);
 }
 
+/* ═══ Mobile overlay insets ═══
+   On mobile the top bar is 52px and bottom tab bar is 60px.
+   Modals and drawers must sit within that safe area so action
+   buttons (Close / Cancel / Submit) are never hidden behind chrome.
+   On desktop (768px+) we restore full-screen behaviour.
+═══════════════════════════════════════════════════════════════ */
+
+/* Side-drawer overlay (Add Expense / Edit Expense) */
+.mobile-drawer-overlay {
+  top: 52px !important;
+  bottom: 60px !important;
+}
+
+/* Side-drawer panel — height must follow overlay */
+.mobile-drawer-panel {
+  height: 100% !important;
+  max-height: 100% !important;
+}
+
+/* Centred modal overlay (Quick Add Expense) */
+.mobile-modal-overlay {
+  top: 52px !important;
+  bottom: 60px !important;
+  padding: 12px !important;
+  align-items: flex-start !important;
+  overflow-y: auto;
+}
+
+@media (min-width: 768px) {
+  .mobile-drawer-overlay,
+  .mobile-modal-overlay {
+    top: 0 !important;
+    bottom: 0 !important;
+  }
+  .mobile-modal-overlay {
+    padding: 16px !important;
+    align-items: center !important;
+    overflow-y: visible;
+  }
+}
+
 /* ═══ Desktop sidebar — hidden on mobile, flex on desktop ═══ */
 .desktop-sidebar {
   display: none;
