@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# reOWN Spends specific ignores
+PRODUCT.md
+db/seed.js
+db/seed-secrets.json
+.env.local
+.env
+
