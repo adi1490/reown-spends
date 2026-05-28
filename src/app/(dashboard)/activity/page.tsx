@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { CustomSelect } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 import { 
   History, 
   User, 
@@ -229,22 +230,20 @@ export default function ActivityLogPage() {
             {/* Start Date */}
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Logged From</label>
-              <input
-                type="date"
+              <DatePicker
                 value={startDate}
-                onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
-                className="w-full p-2.5 rounded-xl border border-border bg-bg-subtle text-text-primary text-xs focus:outline-none focus:border-accent"
+                onChange={(val) => { setStartDate(val); setPage(1); }}
+                placeholder="Logged From"
               />
             </div>
 
             {/* End Date */}
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Logged To</label>
-              <input
-                type="date"
+              <DatePicker
                 value={endDate}
-                onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
-                className="w-full p-2.5 rounded-xl border border-border bg-bg-subtle text-text-primary text-xs focus:outline-none focus:border-accent"
+                onChange={(val) => { setEndDate(val); setPage(1); }}
+                placeholder="Logged To"
               />
             </div>
           </div>

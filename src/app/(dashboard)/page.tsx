@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { CustomSelect } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 import { 
   TrendingUp, 
   Layers, 
@@ -332,19 +333,19 @@ export default function Dashboard() {
           />
 
           {datePreset === 'custom' && (
-            <div className="flex items-center gap-2 animate-fadeIn">
-              <input
-                type="date"
+            <div className="flex items-center gap-2 animate-fadeIn z-[100]">
+              <DatePicker
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="p-1.5 rounded-lg border border-border bg-bg-subtle text-text-primary text-[10px] focus:outline-none"
+                onChange={setStartDate}
+                placeholder="Start Date"
+                className="min-w-[130px] p-2"
               />
               <span className="text-text-muted text-[10px]">-</span>
-              <input
-                type="date"
+              <DatePicker
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="p-1.5 rounded-lg border border-border bg-bg-subtle text-text-primary text-[10px] focus:outline-none"
+                onChange={setEndDate}
+                placeholder="End Date"
+                className="min-w-[130px] p-2"
               />
             </div>
           )}
@@ -631,14 +632,11 @@ export default function Dashboard() {
               {/* Date */}
               <div className="space-y-1">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Date occurred</label>
-                <input
-                  type="date"
-                  required
+                <DatePicker
                   value={formDate}
-                  onChange={(e) => setFormDate(e.target.value)}
-                  className={`w-full p-2.5 rounded-xl border bg-bg-subtle text-text-primary text-xs focus:outline-none focus:border-accent ${
-                    errors.date ? 'border-danger' : 'border-border'
-                  }`}
+                  onChange={setFormDate}
+                  placeholder="Pick a date"
+                  className={errors.date ? 'border-danger' : 'border-border'}
                 />
               </div>
 

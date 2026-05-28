@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { CustomSelect } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 import { 
   Search, 
   Filter, 
@@ -530,20 +531,20 @@ export default function ExpensesPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <p className="text-[9px] text-text-muted">Start Date</p>
-                    <input
-                      type="date"
+                    <DatePicker
                       value={startDate}
-                      onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
-                      className="w-full p-2 text-xs rounded-xl border border-border bg-bg-subtle text-text-primary focus:outline-none focus:border-accent"
+                      onChange={(val) => { setStartDate(val); setPage(1); }}
+                      placeholder="Start Date"
+                      className="p-2"
                     />
                   </div>
                   <div className="space-y-1">
                     <p className="text-[9px] text-text-muted">End Date</p>
-                    <input
-                      type="date"
+                    <DatePicker
                       value={endDate}
-                      onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
-                      className="w-full p-2 text-xs rounded-xl border border-border bg-bg-subtle text-text-primary focus:outline-none focus:border-accent"
+                      onChange={(val) => { setEndDate(val); setPage(1); }}
+                      placeholder="End Date"
+                      className="p-2"
                     />
                   </div>
                 </div>
@@ -859,14 +860,11 @@ export default function ExpensesPage() {
               {/* Date Input */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Date occurred</label>
-                <input
-                  type="date"
-                  required
+                <DatePicker
                   value={formDate}
-                  onChange={(e) => setFormDate(e.target.value)}
-                  className={`w-full p-3 rounded-2xl border bg-bg-subtle/50 text-text-primary text-sm focus:outline-none focus:border-accent focus:bg-bg-surface focus:ring-4 focus:ring-accent/15 transition-all ${
-                    errors.date ? 'border-danger' : 'border-border'
-                  }`}
+                  onChange={setFormDate}
+                  placeholder="Pick a date"
+                  className={errors.date ? 'border-danger' : 'border-border'}
                 />
                 {errors.date && <p className="text-xs text-danger font-medium mt-1">{errors.date}</p>}
               </div>

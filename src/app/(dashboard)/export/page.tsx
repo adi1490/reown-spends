@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { DatePicker } from '@/components/ui/date-picker';
 import { 
   Download, 
   FileText, 
@@ -135,23 +136,21 @@ export default function ExportPage() {
             </div>
 
             {exportScope === 'range' && (
-              <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-bg-subtle border border-border/80 animate-fadeIn">
+              <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-bg-subtle border border-border/80 animate-fadeIn z-50">
                 <div className="space-y-1">
                   <span className="text-[9px] font-bold uppercase tracking-wider text-text-secondary">Start Date</span>
-                  <input
-                    type="date"
+                  <DatePicker
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full p-2 text-xs rounded-xl border border-border bg-bg-surface text-text-primary focus:outline-none focus:border-accent"
+                    onChange={setStartDate}
+                    placeholder="Start Date"
                   />
                 </div>
                 <div className="space-y-1">
                   <span className="text-[9px] font-bold uppercase tracking-wider text-text-secondary">End Date</span>
-                  <input
-                    type="date"
+                  <DatePicker
                     value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full p-2 text-xs rounded-xl border border-border bg-bg-surface text-text-primary focus:outline-none focus:border-accent"
+                    onChange={setEndDate}
+                    placeholder="End Date"
                   />
                 </div>
               </div>
