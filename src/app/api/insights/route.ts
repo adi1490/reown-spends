@@ -72,10 +72,11 @@ export async function GET(request: Request) {
     // 3. Compute Monthly Spend Bar Chart (Last 12 Months - chronological)
     const monthlyMap: Record<string, number> = {};
     // Seed last 12 months with 0
+    // IMPORTANT: always set date to 1st before setMonth to prevent end-of-month
+    // rollover (e.g. May 31 → setMonth(1) → Mar 3 instead of Feb 1).
     for (let i = 11; i >= 0; i--) {
-      const d = new Date();
-      d.setMonth(now.getMonth() - i);
-      const key = d.toLocaleString('en-US', { month: 'short', year: 'numeric' }); // "Aug 2025"
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = d.toLocaleString('en-US', { month: 'short', year: 'numeric' }); // "Feb 2026"
       monthlyMap[key] = 0;
     }
 
