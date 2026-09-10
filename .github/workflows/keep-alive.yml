@@ -1,0 +1,26 @@
+name: Keep Supabase Awake
+
+on:
+  schedule:
+    # Run every day at 02:00 UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  ping-health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Health Endpoint
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+        run: |
+          TARGET_URL="${APP_URL:-https://spends.reown.in}/api/health"
+          echo "Pinging ${TARGET_URL}..."
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" "${TARGET_URL}")
+          echo "Response: ${RESPONSE}"
+
+          STATUS=$(echo "${RESPONSE}" | grep "HTTP_STATUS:" | cut -d':' -f2)
+          if [ "${STATUS}" -ne 200 ]; then
+            echo "Health check failed with HTTP status ${STATUS}"
+            exit 1
+          fi
