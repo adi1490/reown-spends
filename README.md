@@ -29,6 +29,10 @@ Fill in the credentials in `.env.local` using the keys from your Supabase dashbo
 - `SUPABASE_SERVICE_ROLE_KEY`: The private database service role key (keep this strictly confidential!).
 - `JWT_SECRET`: A strong 64+ character random string for signing JWT session cookies.
 
+*(Optional auto-restore configuration for Supabase Free Tier):*
+- `SUPABASE_PROJECT_REF`: Your Supabase project reference ID (e.g. `xyzabcdefg`).
+- `SUPABASE_ACCESS_TOKEN`: Your Personal Access Token generated from Supabase Account Settings -> Access Tokens.
+
 ---
 
 ## 🗄️ Database Setup & Seeding
@@ -57,6 +61,23 @@ To run the development server locally:
 npm run dev
 ```
 Open [http://localhost:3000](http://localhost:3000) with your browser to view the application.
+
+---
+
+## ⏰ Supabase Keep-Alive & Prevent Inactivity Pausing
+
+Supabase automatically pauses Free Tier projects if no database queries occur for 7 consecutive days. To prevent this permanently, multiple redundant mechanisms are provided:
+
+1. **Vercel Cron Job**:
+   - `vercel.json` configures a daily ping to `/api/health` at `0 4 * * *` (04:00 UTC).
+   - `/api/health` executes an active database read query against the `users` table to maintain database activity.
+
+2. **GitHub Actions Cron Workflow** (`.github/workflows/keep-alive.yml`):
+   - A daily workflow runs at `0 2 * * *` (02:00 UTC) to GET `/api/health`.
+   - Set `APP_URL` in your GitHub Repository Secrets (e.g., `https://spends.reown.in` or your Vercel deployment URL) if different from default.
+
+3. **Automatic Supabase Management Unpause/Restore**:
+   - If a database query fails due to project pause, `/api/health` will automatically invoke the Supabase Management REST API (`POST /v1/projects/{ref}/restore`) to restore/unpause the project if `SUPABASE_PROJECT_REF` and `SUPABASE_ACCESS_TOKEN` are configured in environment variables.
 
 ---
 
